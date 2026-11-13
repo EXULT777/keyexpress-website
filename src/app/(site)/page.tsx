@@ -3,6 +3,7 @@ import { ButtonLink, CallButton, PhoneNumberLink } from "@/components/site/butto
 import { FilledText, Paragraphs } from "@/components/site/filled-text";
 import { FaqList, ServiceCard, WhyChooseUsBadges } from "@/components/site/blocks";
 import { KeyIllustration } from "@/components/site/key-illustration";
+import { LocalBusinessJsonLd } from "@/components/site/local-business-json-ld";
 import { RequestServiceForm } from "@/components/site/request-form";
 import { Section, SectionHeading } from "@/components/site/section";
 import { getPlaceholderValues, getSections, getSettings, getVisibleFaqs, getVisibleServices } from "@/server/site-data";
@@ -34,6 +35,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <LocalBusinessJsonLd settings={settings} services={services} />
       {hero.visible ? (
         <section aria-labelledby="hero-heading" className="bg-brushed">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1fr_auto]">
