@@ -1,0 +1,3 @@
+# SQLite through the libsql driver, not better-sqlite3
+
+The site must run on shared cPanel hosting, where servers are typically CloudLinux 8 (glibc 2.28, GCC 8's libstdc++), and nothing can be compiled there. Prisma 7 needs a driver adapter for SQLite. The usual one, `@prisma/adapter-better-sqlite3`, loads better-sqlite3 13, whose bundled `prebuilds/linux-x64.node` needs glibc 2.34 and GLIBCXX 3.4.29, so it fails to load on those servers. We use `@prisma/adapter-libsql` with a local `file:` URL instead: its `@libsql/linux-x64-gnu` binary needs only glibc 2.18 and no libstdc++. Don't swap back to better-sqlite3 without checking the server's glibc first (`ldd --version`).

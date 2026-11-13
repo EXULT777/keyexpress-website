@@ -57,3 +57,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /.lighthouse/
+
+# upload folder made by `npm run bundle`
+/deploy/
