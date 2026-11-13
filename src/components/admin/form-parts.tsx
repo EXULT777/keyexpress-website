@@ -12,6 +12,7 @@ export const inputBase =
 export const inputClasses = `mt-2 ${inputBase}`;
 
 export function TextField({
+  id: givenId,
   name,
   label,
   hint,
@@ -22,6 +23,8 @@ export function TextField({
   multiline,
   rows = 4,
 }: {
+  // Needed when the same field name appears in more than one form on a page.
+  id?: string;
   name: string;
   label: string;
   hint?: ReactNode;
@@ -32,7 +35,7 @@ export function TextField({
   multiline?: boolean;
   rows?: number;
 }) {
-  const id = `field-${name}`;
+  const id = givenId ?? `field-${name}`;
   const describedBy = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(" ") || undefined;
   const shared = {
     id,
