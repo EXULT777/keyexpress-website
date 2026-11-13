@@ -70,6 +70,14 @@
   }
 }
 
+@layer components {
+  /* The bottom of the brushed-silver gradient is too dark for #1e56c7 text
+     (4.0:1), so links there use the darker blue (5.6:1). */
+  .bg-brushed .text-action {
+    color: var(--color-action-hover);
+  }
+}
+
 /* Admin-written Markdown (the Privacy Policy and its preview). */
 @layer components {
   .policy > * + * {
