@@ -78,6 +78,9 @@ export async function saveUpload(
   }
   const type = detect(file.bytes);
   if (!type) return { ok: false, error: NOT_AN_IMAGE };
+  if (type === "svg" && kind === "social") {
+    return { ok: false, error: "Please choose a PNG, JPG or WebP picture. Social sites can't show SVGs." };
+  }
 
   let data: Buffer;
   let extension: "svg" | "webp";

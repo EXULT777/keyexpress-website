@@ -73,6 +73,15 @@ describe("uploading an image", () => {
     expect(text).not.toMatch(/script|onload|onclick|javascript:|alert/i);
   });
 
+  test("an SVG can't be a sharing picture, because social sites don't show SVGs", async () => {
+    const dir = await dataDir();
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h10v10z"/></svg>';
+
+    const result = await saveUpload(dir, { name: "share.svg", bytes: Buffer.from(svg) }, "social");
+
+    expect(result).toEqual({ ok: false, error: "Please choose a PNG, JPG or WebP picture. Social sites can't show SVGs." });
+  });
+
   test("a very large photo is shrunk to at most 1600 pixels wide", async () => {
     const dir = await dataDir();
 
