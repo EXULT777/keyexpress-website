@@ -1,4 +1,5 @@
 import { ClipboardList } from "lucide-react";
+import Image from "next/image";
 import { ButtonLink, CallButton } from "@/components/site/buttons";
 import { FilledText, Paragraphs } from "@/components/site/filled-text";
 import { PageHeader } from "@/components/site/site-chrome";
@@ -76,13 +77,18 @@ export default async function ServicesPage() {
               </div>
             </div>
             {service.imageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={service.imageUrl}
-                alt={service.title}
-                loading={index < 2 ? "eager" : "lazy"}
-                className="aspect-[4/3] w-full rounded-2xl border-2 border-silver object-cover md:w-80"
-              />
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border-2 border-silver md:w-80">
+                <Image
+                  src={service.imageUrl}
+                  alt={service.title}
+                  fill
+                  sizes="(min-width: 768px) 320px, 100vw"
+                  loading={index < 2 ? "eager" : "lazy"}
+                  // Photos are resized for each screen; SVG drawings are shown as they are.
+                  unoptimized={service.imageUrl.endsWith(".svg")}
+                  className="object-cover"
+                />
+              </div>
             )}
           </article>
         ))}

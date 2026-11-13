@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   // This folder is the project, even when a parent folder has its own lockfile.
   outputFileTracingRoot: path.resolve(import.meta.dirname),
   poweredByHeader: false,
+  images: {
+    // Only uploaded photos go through the image resizer, and never with a query string.
+    localPatterns: [{ pathname: "/uploads/**", search: "" }],
+  },
   experimental: {
     serverActions: {
       // Uploads are capped at exactly 2 MB in src/server/uploads.ts. This limit
