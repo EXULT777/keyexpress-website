@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import {
   Building2,
   Car,
@@ -17,6 +18,7 @@ import {
   Truck,
   Wrench,
   type LucideIcon,
+  type LucideProps,
 } from "lucide-react";
 
 // The icons the Admin can pick for a Service or a Why Choose Us badge. The key is
@@ -51,4 +53,9 @@ export function isIconName(value: string): value is IconName {
 
 export function iconFor(name: string): LucideIcon {
   return isIconName(name) ? icons[name].Icon : KeyRound;
+}
+
+// Renders the icon stored under `name` (an unknown name shows a key).
+export function NamedIcon({ name, ...props }: { name: string } & LucideProps) {
+  return createElement(iconFor(name), props);
 }
