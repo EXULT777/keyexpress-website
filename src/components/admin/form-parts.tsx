@@ -6,8 +6,10 @@ import { buttonClasses } from "@/components/site/buttons";
 import type { ActionResult } from "@/lib/action-result";
 import { cn } from "@/lib/cn";
 
-export const inputClasses =
-  "mt-2 block min-h-14 w-full rounded-xl border-2 border-ink-soft bg-white px-4 py-3 text-lg text-ink aria-[invalid=true]:border-error";
+export const inputBase =
+  "block min-h-14 w-full rounded-xl border-2 border-ink-soft bg-white px-4 py-3 text-lg text-ink aria-[invalid=true]:border-error";
+
+export const inputClasses = `mt-2 ${inputBase}`;
 
 export function TextField({
   name,

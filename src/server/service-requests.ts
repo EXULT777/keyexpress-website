@@ -7,6 +7,7 @@ import {
   type RequestField,
   type RequestStatus,
 } from "@/lib/service-request";
+import { isFullPhoneNumber } from "@/lib/phone";
 import { listServices } from "./content";
 import type { Db } from "./db";
 import { checkRateLimit, recordAttempt, type RateLimitRule } from "./rate-limit";
@@ -20,7 +21,7 @@ const fieldsFor = (services: Set<string>) => z.object({
     .string()
     .trim()
     .min(1, "Please enter your phone number.")
-    .refine(isCallable, "Please enter your full phone number, including the area code."),
+    .refine(isFullPhoneNumber, "Please enter your full phone number, including the area code."),
   email: z
     .string()
     .trim()
@@ -38,14 +39,6 @@ const fieldsFor = (services: Set<string>) => z.object({
   message: z.string().trim().max(2000, "Please shorten your message to 2,000 characters."),
   emergency: z.boolean(),
 });
-
-// A US number with its area code (10 digits, or 11 starting with 1), or an
-// international one written with a leading +.
-function isCallable(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-  if (phone.startsWith("+")) return digits.length >= 8 && digits.length <= 15;
-  return digits.length === 10 || (digits.length === 11 && digits.startsWith("1"));
-}
 
 const HOUR = 60 * 60_000;
 
@@ -114,4 +107,14 @@ export type ServiceRequestRecord = {
 export async function listServiceRequests(db: Db): Promise<ServiceRequestRecord[]> {
   const rows = await db.serviceRequest.findMany({ orderBy: [{ createdAt: "desc" }, { id: "desc" }] });
   return rows.map((row) => ({ ...row, status: isRequestStatus(row.status) ? row.status : "NEW" }));
+}
+
+export async function countServiceRequests(db: Db, now = new Date()) {
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60_000);
+  const [fresh, emergencies, lastWeek] = await Promise.all([
+    db.serviceRequest.count({ where: { status: "NEW" } }),
+    db.serviceRequest.count({ where: { status: "NEW", emergency: true } }),
+    db.serviceRequest.count({ where: { createdAt: { gte: weekAgo } } }),
+  ]);
+  return { fresh, emergencies, lastWeek };
 }

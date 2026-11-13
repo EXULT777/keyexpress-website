@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AdminPageTitle } from "@/components/admin/page-title";
 import { requireAdmin } from "@/server/admin-session";
 import { db } from "@/server/db";
+import { countServiceRequests } from "@/server/service-requests";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -17,12 +18,7 @@ const shortcuts = [
 
 export default async function DashboardPage() {
   await requireAdmin();
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60_000);
-  const [newCount, emergencyCount, weekCount] = await Promise.all([
-    db.serviceRequest.count({ where: { status: "NEW" } }),
-    db.serviceRequest.count({ where: { status: "NEW", emergency: true } }),
-    db.serviceRequest.count({ where: { createdAt: { gte: weekAgo } } }),
-  ]);
+  const { fresh: newCount, emergencies: emergencyCount, lastWeek: weekCount } = await countServiceRequests(db);
 
   return (
     <>

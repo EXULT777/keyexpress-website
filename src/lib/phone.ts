@@ -7,3 +7,11 @@ export function telHref(phone: string): string {
   if (digits.length === 11 && digits.startsWith("1")) return `tel:+${digits}`;
   return `tel:${digits}`;
 }
+
+// A US number with its area code (10 digits, or 11 starting with 1), or an
+// international one written with a leading +.
+export function isFullPhoneNumber(phone: string): boolean {
+  const digits = phone.replace(/\D/g, "");
+  if (phone.trim().startsWith("+")) return digits.length >= 8 && digits.length <= 15;
+  return digits.length === 10 || (digits.length === 11 && digits.startsWith("1"));
+}
