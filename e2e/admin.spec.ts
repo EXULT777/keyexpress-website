@@ -90,6 +90,96 @@ test.describe("Admin panel", () => {
     await expect(page.locator("ol > li", { hasText: "Safe Opening" })).toHaveCount(0);
   });
 
+  test("an existing Service and question can be edited", async ({ page }) => {
+    await logIn(page);
+    await page.goto("/admin/services");
+    await page.getByRole("link", { name: /Edit.*Smart Keys/ }).click();
+    await page.getByLabel("Title", { exact: true }).fill("Smart Keys & Push-to-Start");
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.getByText("Saved ✓")).toBeVisible();
+    await page.goto("/admin/faq");
+    await page.getByRole("link", { name: /Edit.*How quickly can you get to me/ }).click();
+    await page.getByLabel("Answer", { exact: true }).fill("Usually within 20–40 minutes. Call {phone} and we'll tell you.");
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.getByText("Saved ✓")).toBeVisible();
+
+    try {
+      await page.goto("/services");
+      await expect(page.locator("#smart-keys h2")).toHaveText("Smart Keys & Push-to-Start");
+      await page.goto("/faq");
+      await page.getByText("How quickly can you get to me?").click();
+      const answer = page.locator("details[open]");
+      await expect(answer.getByText("Usually within 20–40 minutes.")).toBeVisible();
+      await expect(answer.getByRole("link", { name: "(555) 014-7823" })).toHaveAttribute("href", "tel:+15550147823");
+    } finally {
+      await page.goto("/admin/services");
+      await page.getByRole("link", { name: /Edit.*Smart Keys/ }).click();
+      await page.getByLabel("Title", { exact: true }).fill("Smart Keys");
+      await page.getByRole("button", { name: "Save changes" }).click();
+      await expect(page.getByText("Saved ✓")).toBeVisible();
+      await page.goto("/admin/faq");
+      await page.getByRole("link", { name: /Edit.*How quickly can you get to me/ }).click();
+      await page
+        .getByLabel("Answer", { exact: true })
+        .fill(
+          "We're a mobile service, so a technician heads to you as soon as you call. In most cases we arrive within 20–40 minutes, depending on your location and traffic.",
+        );
+      await page.getByRole("button", { name: "Save changes" }).click();
+      await expect(page.getByText("Saved ✓")).toBeVisible();
+    }
+  });
+
+  test("a Service photo is shown on the Services page, resized for the screen", async ({ page }, testInfo) => {
+    const photo = testInfo.outputPath("van.jpg");
+    await sharp({ create: { width: 1600, height: 1200, channels: 3, background: "#1e56c7" } }).jpeg().toFile(photo);
+    await logIn(page);
+    await page.goto("/admin/services");
+    await page.getByRole("link", { name: /Edit.*Residential/ }).click();
+    await page.getByLabel("Choose a picture").setInputFiles(photo);
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.getByText("Saved ✓")).toBeVisible();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/services#residential");
+    const image = page.locator("#residential img");
+    await expect(image).toHaveAttribute("alt", "Residential");
+    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.currentSrc)).toContain("/_next/image?url=%2Fuploads%2Fservice-");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/admin/services");
+    await page.getByRole("link", { name: /Edit.*Residential/ }).click();
+    await page.getByLabel("Remove this picture").check();
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.getByText("Saved ✓")).toBeVisible();
+    await page.goto("/services");
+    await expect(page.locator("#residential img")).toHaveCount(0);
+  });
+
+  test("with the home page's form hidden, Request Service opens the Contact page's form", async ({ page }) => {
+    await logIn(page);
+    await page.goto("/admin/content");
+    const form = page.locator("details", { hasText: "Request service form" });
+    await form.locator("summary").click();
+    await form.getByLabel("Show this section on the home page").uncheck();
+    await form.getByRole("button", { name: "Save changes" }).click();
+    await expect(form.getByText("Saved ✓")).toBeVisible();
+
+    try {
+      await page.goto("/");
+      await expect(page.locator("#request")).toHaveCount(0);
+      await page.locator("section[aria-labelledby=hero-heading]").getByRole("link", { name: "Request Service" }).click();
+      await expect(page).toHaveURL(/\/contact#request$/);
+      await expect(page.getByRole("button", { name: "Send Request" })).toBeVisible();
+    } finally {
+      await page.goto("/admin/content");
+      const again = page.locator("details", { hasText: "Request service form" });
+      await again.locator("summary").click();
+      await again.getByLabel("Show this section on the home page").check();
+      await again.getByRole("button", { name: "Save changes" }).click();
+      await expect(again.getByText("Saved ✓")).toBeVisible();
+    }
+  });
+
   test("Services can be put in a new order", async ({ page }) => {
     await logIn(page);
     await page.goto("/admin/services");

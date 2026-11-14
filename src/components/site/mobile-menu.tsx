@@ -33,7 +33,7 @@ export function MobileMenu() {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpenOn(open ? null : pathname)}
-        className="inline-flex min-h-14 items-center gap-2 rounded-xl border-2 border-navy px-3 text-lg font-bold text-navy hover:bg-silver-light sm:px-4"
+        className="inline-flex min-h-14 items-center gap-2 rounded-xl border-2 border-white px-3 text-lg font-bold text-white hover:bg-white/10 sm:px-4"
       >
         {open ? <X aria-hidden="true" className="size-7" /> : <Menu aria-hidden="true" className="size-7" />}
         {open ? "Close" : "Menu"}
@@ -42,9 +42,11 @@ export function MobileMenu() {
         id={panelId}
         aria-label="Main"
         hidden={!open}
-        className="absolute inset-x-0 top-full z-30 border-b-4 border-silver bg-white shadow-lg"
+        // A white panel inside the dark header, so it uses the light-background focus outline.
+        className="on-light absolute inset-x-0 top-full z-30 border-b-4 border-silver bg-white shadow-lg"
       >
         <NavLinks
+          tone="light"
           className="mx-auto flex max-w-6xl flex-col px-4 py-2"
           linkClassName="flex min-h-14 items-center border-b border-silver-soft px-2 text-xl font-bold"
         />

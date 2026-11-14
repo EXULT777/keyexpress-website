@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ChevronDown } from "lucide-react";
 import { AdminPageTitle } from "@/components/admin/page-title";
-import { pageSections, sectionKeys, type SectionKey } from "@/lib/page-sections";
+import { homeSectionKeys, isHomeSection, pageSections, sectionKeys, type SectionKey } from "@/lib/page-sections";
 import { requireAdmin } from "@/server/admin-session";
 import { getPageSections } from "@/server/content";
 import { db } from "@/server/db";
@@ -11,8 +11,8 @@ import { SectionForm } from "./section-form";
 export const metadata: Metadata = { title: "Page Content" };
 
 const groups: { title: string; keys: SectionKey[] }[] = [
-  { title: "Home page, from top to bottom", keys: sectionKeys.filter((key) => pageSections[key].page === "home") },
-  { title: "Other pages", keys: sectionKeys.filter((key) => pageSections[key].page !== "home") },
+  { title: "Home page, from top to bottom", keys: homeSectionKeys },
+  { title: "Other pages", keys: sectionKeys.filter((key) => !isHomeSection(key)) },
 ];
 
 export default async function ContentPage() {
@@ -24,8 +24,9 @@ export default async function ContentPage() {
       <AdminPageTitle title="Page Content">
         <p>Open a section to change its text, then press Save. The website updates right away.</p>
         <p className="mt-2">
-          Tip: write <strong>{"{phone}"}</strong>, <strong>{"{email}"}</strong> or <strong>{"{city}"}</strong> and the
-          website fills in the details from Business Settings. Phone numbers become tap-to-call links.
+          Tip: in any box here, in Services and Questions (FAQ), and in the footer text, write{" "}
+          <strong>{"{phone}"}</strong>, <strong>{"{email}"}</strong> or <strong>{"{city}"}</strong> and the website
+          fills in the details from Business Settings. In longer text, phone numbers become tap-to-call links.
         </p>
       </AdminPageTitle>
       {groups.map((group) => (
@@ -37,7 +38,7 @@ export default async function ContentPage() {
             {group.keys.map((key) => {
               const definition = pageSections[key];
               const section = sections[key];
-              const hideable = definition.page === "home";
+              const hideable = isHomeSection(key);
               return (
                 <details key={key} className="group rounded-2xl border-2 border-silver bg-white">
                   <summary className="flex min-h-16 items-center justify-between gap-4 rounded-2xl px-5 py-4 text-xl font-bold text-navy hover:bg-silver-light">

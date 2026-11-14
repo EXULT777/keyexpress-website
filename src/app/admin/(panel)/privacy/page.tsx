@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminCard } from "@/components/admin/form-parts";
 import { AdminPageTitle } from "@/components/admin/page-title";
+import { placeholderValues } from "@/lib/placeholders";
 import { requireAdmin } from "@/server/admin-session";
 import { getBusinessSettings, getPrivacyPolicy } from "@/server/content";
 import { db } from "@/server/db";
@@ -25,11 +26,7 @@ export default async function PrivacyAdminPage() {
       <AdminCard>
         <PolicyEditor
           markdown={policy.markdown}
-          initialPreview={renderMarkdown(policy.markdown, {
-            phone: settings.phone,
-            email: settings.email,
-            city: settings.serviceAreaCity,
-          })}
+          initialPreview={renderMarkdown(policy.markdown, placeholderValues(settings))}
         />
       </AdminCard>
     </>

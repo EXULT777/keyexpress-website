@@ -9,10 +9,10 @@ export const DEFAULT_OG_IMAGE = "/og-image";
 
 // Title, description and social preview for a page, from the Admin's SEO section.
 export async function pageMetadata(path: string): Promise<Metadata> {
-  const [allSeo, values, settings] = await Promise.all([getAllPageSeo(), getPlaceholderValues(), getSettings()]);
+  const [allSeo, placeholders, settings] = await Promise.all([getAllPageSeo(), getPlaceholderValues(), getSettings()]);
   const seo = allSeo.find((entry) => entry.path === path);
-  const title = fillPlaceholders(seo?.title ?? settings.businessName, values);
-  const description = seo ? fillPlaceholders(seo.description, values) : undefined;
+  const title = fillPlaceholders(seo?.title ?? settings.businessName, placeholders);
+  const description = seo ? fillPlaceholders(seo.description, placeholders) : undefined;
   const image = seo?.ogImageUrl
     ? { url: seo.ogImageUrl, alt: title }
     : { url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: settings.businessName };

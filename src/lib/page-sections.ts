@@ -47,12 +47,19 @@ export const pageSections = {
   "home.hero": section({
     title: "Top of the page",
     page: "home",
-    schema: z.object({ heading: line(), text: text(), callButton: line(40), requestButton: line(40) }),
+    schema: z.object({
+      heading: line(),
+      text: text(),
+      callButton: line(40),
+      requestButton: line(40),
+      phoneIntro: line(80),
+    }),
     fields: {
       heading,
       text: paragraph,
       callButton: { label: "Call button text", kind: "line" },
       requestButton: { label: "Request button text", kind: "line" },
+      phoneIntro: { label: "Line above the big phone number", kind: "line" },
     },
   }),
   "home.emergency": section({
@@ -70,8 +77,8 @@ export const pageSections = {
   "home.about": section({
     title: "About us",
     page: "home",
-    schema: z.object({ heading: line(), text: text() }),
-    fields: { heading, text: paragraph },
+    schema: z.object({ heading: line(), text: text(), button: line(40) }),
+    fields: { heading, text: paragraph, button: { label: "Button text (opens the About page)", kind: "line" } },
   }),
   "home.whyChooseUs": section({
     title: "Why choose us",
@@ -82,8 +89,13 @@ export const pageSections = {
   "home.services": section({
     title: "Our services",
     page: "home",
-    schema: z.object({ heading: line(), text: text() }),
-    fields: { heading, text: paragraph },
+    schema: z.object({ heading: line(), text: text(), cardLink: line(40), button: line(40) }),
+    fields: {
+      heading,
+      text: paragraph,
+      cardLink: { label: "Link on each service card (calls you)", kind: "line" },
+      button: { label: "Button text (opens the Services page)", kind: "line" },
+    },
   }),
   "home.fobHighlight": section({
     title: "Key fob highlight",
@@ -123,8 +135,8 @@ export const pageSections = {
   "services.intro": section({
     title: "Services page",
     page: "services",
-    schema: z.object({ heading: line(), text: text() }),
-    fields: { heading, text: paragraph },
+    schema: z.object({ heading: line(), text: text(), jumpHeading: line(60) }),
+    fields: { heading, text: paragraph, jumpHeading: { label: "Heading above the list of service links", kind: "line" } },
   }),
   "about.intro": section({
     title: "About page",
@@ -135,8 +147,13 @@ export const pageSections = {
   "faq.intro": section({
     title: "Questions page",
     page: "faq",
-    schema: z.object({ heading: line(), text: text() }),
-    fields: { heading, text: paragraph },
+    schema: z.object({ heading: line(), text: text(), closingHeading: line(80), closingText: text(300) }),
+    fields: {
+      heading,
+      text: paragraph,
+      closingHeading: { label: "Heading of the box at the end", kind: "line" },
+      closingText: { label: "Text of the box at the end", kind: "text" },
+    },
   }),
   "contact.intro": section({
     title: "Contact page",
@@ -158,7 +175,11 @@ export type SectionContent<K extends SectionKey> = z.infer<(typeof pageSections)
 export const sectionKeys = Object.keys(pageSections) as SectionKey[];
 
 // Home Sections, top to bottom. Only these can be hidden.
-export const homeSectionKeys = sectionKeys.filter((key) => pageSections[key].page === "home");
+export function isHomeSection(key: SectionKey): boolean {
+  return pageSections[key].page === "home";
+}
+
+export const homeSectionKeys = sectionKeys.filter(isHomeSection);
 
 export function isSectionKey(value: string): value is SectionKey {
   return Object.hasOwn(pageSections, value);

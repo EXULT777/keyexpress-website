@@ -44,7 +44,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/admin/r
                   href={tab.href}
                   aria-current={tab.current ? "page" : undefined}
                   className={cn(
-                    "inline-flex min-h-12 items-center rounded-xl border-2 px-4 text-lg font-bold",
+                    "inline-flex min-h-14 items-center rounded-xl border-2 px-4 text-lg font-bold",
                     tab.current ? "border-action bg-action text-white" : "border-silver bg-white text-navy hover:border-action",
                   )}
                 >
@@ -62,18 +62,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/admin/r
       </div>
 
       <Inbox
-        requests={shown.map((request) => ({
-          id: request.id,
-          receivedAt: request.createdAt.toISOString(),
-          fullName: request.fullName,
-          phone: request.phone,
-          email: request.email,
-          service: request.service,
-          address: request.address,
-          message: request.message,
-          emergency: request.emergency,
-          status: request.status,
-        }))}
+        requests={shown.map(({ createdAt, ...request }) => ({ ...request, receivedAt: createdAt.toISOString() }))}
       />
     </>
   );

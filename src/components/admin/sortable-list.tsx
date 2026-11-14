@@ -10,7 +10,7 @@ import { ResultMessage } from "./form-parts";
 export type ListItem = { id: number; title: string; visible: boolean };
 
 const smallButton =
-  "inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-silver bg-white px-3 font-bold text-navy hover:border-action hover:text-action disabled:opacity-40 disabled:hover:border-silver disabled:hover:text-navy";
+  "inline-flex min-h-14 items-center gap-2 rounded-xl border-2 border-silver bg-white px-3 font-bold text-navy hover:border-action hover:text-action disabled:opacity-40 disabled:hover:border-silver disabled:hover:text-navy";
 
 // The Services and FAQ lists: edit, reorder, show or hide, and delete, with one
 // message at the top saying what just happened.
@@ -86,7 +86,7 @@ export function SortableList({
               </div>
             ) : (
               <div className="mt-4 flex flex-wrap gap-3">
-                <Link href={`${editHrefBase}/${item.id}`} className={buttonClasses("primary", "min-h-12 px-4")}>
+                <Link href={`${editHrefBase}/${item.id}`} className={buttonClasses("primary", "px-4")}>
                   <Pencil aria-hidden="true" className="size-5" /> Edit<span className="sr-only"> {item.title}</span>
                 </Link>
                 <button type="button" disabled={pending || index === 0} onClick={() => act(() => move(item.id, "up"))} className={smallButton}>

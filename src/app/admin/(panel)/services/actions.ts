@@ -1,16 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { errorsFromIssues, invalid, saved, type ActionResult } from "@/lib/action-result";
 import { isIconName } from "@/lib/icons";
 import { requireAdmin } from "@/server/admin-session";
 import { db } from "@/server/db";
-import { checked, file, required, text } from "@/server/form-data";
-import { reorder, uniqueSlug } from "@/server/ordering";
+import { checked, required, text } from "@/server/form-data";
+import { nextSortOrder, reorder, uniqueSlug } from "@/server/ordering";
 import { dataDir } from "@/server/paths";
-import { deleteUpload, saveUpload } from "@/server/uploads";
+import { refreshPublicSite } from "@/server/refresh";
+import { deleteUpload, imageFromForm } from "@/server/uploads";
 
 const serviceSchema = z.object({
   title: required("a title", 80),
@@ -19,10 +19,6 @@ const serviceSchema = z.object({
   icon: z.string().refine(isIconName, "Please pick an icon."),
   visible: z.boolean(),
 });
-
-function changed() {
-  revalidatePath("/", "layout");
-}
 
 // Adds a Service (id null) or saves changes to one.
 export async function saveService(id: number | null, _previous: ActionResult, formData: FormData): Promise<ActionResult> {
@@ -36,28 +32,25 @@ export async function saveService(id: number | null, _previous: ActionResult, fo
   });
   if (!parsed.success) return invalid(errorsFromIssues(parsed.error.issues));
 
-  const image = file(formData, "image");
-  let imagePath: string | null | undefined;
-  if (image) {
-    const upload = await saveUpload(dataDir(), { name: image.name, bytes: new Uint8Array(await image.arrayBuffer()) }, "service");
-    if (!upload.ok) return invalid({ image: upload.error });
-    imagePath = upload.url;
-  } else if (checked(formData, "removeImage")) {
-    imagePath = null;
-  }
+  const image = await imageFromForm(dataDir(), formData, "service");
+  if (!image.ok) return invalid({ image: image.error });
+  const { imagePath } = image;
 
   if (id === null) {
-    const existing = await db.service.findMany({ select: { slug: true, sortOrder: true } });
+    const [existing, highest] = await Promise.all([
+      db.service.findMany({ select: { slug: true } }),
+      db.service.aggregate({ _max: { sortOrder: true } }),
+    ]);
     const created = await db.service.create({
       data: {
         ...parsed.data,
         imagePath: imagePath ?? null,
         // The link on the Services page; it stays the same if the title changes later.
         slug: uniqueSlug(parsed.data.title, new Set(existing.map((service) => service.slug))),
-        sortOrder: Math.max(-1, ...existing.map((service) => service.sortOrder)) + 1,
+        sortOrder: nextSortOrder(highest._max.sortOrder),
       },
     });
-    changed();
+    refreshPublicSite();
     redirect(`/admin/services/${created.id}?added=1`);
   }
 
@@ -65,7 +58,7 @@ export async function saveService(id: number | null, _previous: ActionResult, fo
   if (!before) return { status: "failed", message: "This service was deleted. Please go back to the list." };
   await db.service.update({ where: { id }, data: { ...parsed.data, ...(imagePath !== undefined && { imagePath }) } });
   if (imagePath !== undefined) await deleteUpload(dataDir(), before.imagePath);
-  changed();
+  refreshPublicSite();
   return saved();
 }
 
@@ -77,14 +70,14 @@ export async function moveService(id: number, direction: "up" | "down"): Promise
       db.service.update({ where: { id: serviceId }, data: { sortOrder } }),
     ),
   );
-  changed();
+  refreshPublicSite();
   return saved(direction === "up" ? "Moved up ✓" : "Moved down ✓");
 }
 
 export async function setServiceVisible(id: number, visible: boolean): Promise<ActionResult> {
   await requireAdmin();
   await db.service.update({ where: { id }, data: { visible } });
-  changed();
+  refreshPublicSite();
   return saved(visible ? "Now shown on the website ✓" : "Now hidden from the website ✓");
 }
 
@@ -94,6 +87,6 @@ export async function deleteService(id: number): Promise<ActionResult> {
   if (!service) return saved("Deleted ✓");
   await db.service.delete({ where: { id } });
   await deleteUpload(dataDir(), service.imagePath);
-  changed();
+  refreshPublicSite();
   return saved(`“${service.title}” deleted ✓`);
 }

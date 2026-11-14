@@ -4,6 +4,7 @@ import { FilledText } from "@/components/site/filled-text";
 import { LocalBusinessJsonLd } from "@/components/site/local-business-json-ld";
 import { RequestServiceForm } from "@/components/site/request-form";
 import { PageHeader } from "@/components/site/site-chrome";
+import { fillPlaceholders } from "@/lib/placeholders";
 import { pageMetadata } from "@/server/page-metadata";
 import { getPlaceholderValues, getSections, getSettings, getVisibleServices } from "@/server/site-data";
 
@@ -12,7 +13,7 @@ export function generateMetadata() {
 }
 
 export default async function ContactPage() {
-  const [settings, sections, services, values] = await Promise.all([
+  const [settings, sections, services, placeholders] = await Promise.all([
     getSettings(),
     getSections(),
     getVisibleServices(),
@@ -24,9 +25,9 @@ export default async function ContactPage() {
   return (
     <>
       <LocalBusinessJsonLd settings={settings} services={services} />
-      <PageHeader title={intro.heading}>
+      <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
         <p>
-          <FilledText text={intro.text} values={values} />
+          <FilledText text={intro.text} placeholders={placeholders} />
         </p>
       </PageHeader>
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-12 sm:px-6 md:py-16 lg:grid-cols-[1fr_1.4fr]">
@@ -68,16 +69,16 @@ export default async function ContactPage() {
 
         <section id="request" aria-labelledby="request-heading" className="scroll-mt-4">
           <h2 id="request-heading" className="text-[1.75rem] md:text-3xl">
-            {request.heading}
+            {fillPlaceholders(request.heading, placeholders)}
           </h2>
           <p className="mt-4 text-xl">
-            <FilledText text={request.text} values={values} />
+            <FilledText text={request.text} placeholders={placeholders} />
           </p>
           <RequestServiceForm
             services={services.map((service) => service.title)}
-            buttonLabel={request.button}
+            buttonLabel={fillPlaceholders(request.button, placeholders)}
             successMessage={request.successMessage}
-            values={values}
+            placeholders={placeholders}
           />
         </section>
       </div>

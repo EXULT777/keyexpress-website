@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { getSettings } from "@/server/site-data";
+import { getSections, getSettings } from "@/server/site-data";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import { StickyCallBar } from "./sticky-call-bar";
@@ -7,7 +7,7 @@ import { StickyCallBar } from "./sticky-call-bar";
 // Everything around a public page's content. Used by the public pages' layout
 // and by the "page not found" page, which sits outside that layout.
 export async function SiteChrome({ children }: { children: ReactNode }) {
-  const settings = await getSettings();
+  const [settings, sections] = await Promise.all([getSettings(), getSections()]);
   return (
     <>
       <a
@@ -24,7 +24,7 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
       <div className="bg-navy pb-28 lg:pb-0">
         <SiteFooter settings={settings} />
       </div>
-      <StickyCallBar phone={settings.phone} />
+      <StickyCallBar phone={settings.phone} homeHasRequestForm={sections["home.request"].visible} />
     </>
   );
 }

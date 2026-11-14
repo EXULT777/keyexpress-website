@@ -3,6 +3,7 @@ import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sanitizeHtml from "sanitize-html";
 import sharp from "sharp";
+import { checked, file } from "./form-data";
 import { uploadsDir } from "./paths";
 
 // Images the Admin uploads: the logo, Service photos and social preview images.
@@ -68,15 +69,11 @@ function cleanSvg(text: string): string {
   });
 }
 
-export async function saveUpload(
-  dataDir: string,
-  file: { name: string; bytes: Uint8Array },
-  kind: UploadKind,
-): Promise<UploadResult> {
-  if (file.bytes.byteLength > MAX_UPLOAD_BYTES) {
+export async function saveUpload(dataDir: string, bytes: Uint8Array, kind: UploadKind): Promise<UploadResult> {
+  if (bytes.byteLength > MAX_UPLOAD_BYTES) {
     return { ok: false, error: "That file is too big. Please choose an image smaller than 2 MB." };
   }
-  const type = detect(file.bytes);
+  const type = detect(bytes);
   if (!type) return { ok: false, error: NOT_AN_IMAGE };
   if (type === "svg" && kind === "social") {
     return { ok: false, error: "Please choose a PNG, JPG or WebP picture. Social sites can't show SVGs." };
@@ -85,11 +82,11 @@ export async function saveUpload(
   let data: Buffer;
   let extension: "svg" | "webp";
   if (type === "svg") {
-    data = Buffer.from(cleanSvg(Buffer.from(file.bytes).toString("utf8")));
+    data = Buffer.from(cleanSvg(Buffer.from(bytes).toString("utf8")));
     extension = "svg";
   } else {
     try {
-      data = await sharp(file.bytes)
+      data = await sharp(bytes)
         .rotate()
         .resize({ width: maxWidth[kind], withoutEnlargement: true })
         .webp({ quality: 82 })
@@ -104,6 +101,22 @@ export async function saveUpload(
   await mkdir(uploadsDir(dataDir), { recursive: true });
   await writeFile(path.join(/*turbopackIgnore: true*/ uploadsDir(dataDir), name), data);
   return { ok: true, url: `/uploads/${name}` };
+}
+
+// An Admin form's picture field: a newly chosen file (saved, giving its URL), the
+// "Remove this picture" box (null), or neither, which keeps the current picture
+// (undefined).
+export async function imageFromForm(
+  dataDir: string,
+  formData: FormData,
+  kind: UploadKind,
+): Promise<{ ok: true; imagePath: string | null | undefined } | { ok: false; error: string }> {
+  const chosen = file(formData, "image");
+  if (chosen) {
+    const upload = await saveUpload(dataDir, new Uint8Array(await chosen.arrayBuffer()), kind);
+    return upload.ok ? { ok: true, imagePath: upload.url } : upload;
+  }
+  return { ok: true, imagePath: checked(formData, "removeImage") ? null : undefined };
 }
 
 // Only names this module creates: no folders, no "..".

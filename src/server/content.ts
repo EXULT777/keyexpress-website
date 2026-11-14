@@ -43,14 +43,16 @@ export async function getBusinessSettings(db: Db): Promise<BusinessSettings> {
 export type SectionState<K extends SectionKey> = { content: SectionContent<K>; visible: boolean };
 export type PageSectionMap = { [K in SectionKey]: SectionState<K> };
 
-// Every Page Section, checked against its schema. A section with no row, or a row
-// that no longer fits its schema, falls back to the starter text instead of
-// breaking the page.
+// Every Page Section, checked against its schema. Saved text is laid over the
+// starter text, so a field added in a later version shows its starter text
+// instead of hiding the Admin's edits. A row that still doesn't fit its schema
+// falls back to the starter text rather than breaking the page.
 export async function getPageSections(db: Db): Promise<PageSectionMap> {
   const rows = new Map((await db.pageSection.findMany()).map((row) => [row.key, row]));
   const entries = sectionKeys.map((key) => {
     const row = rows.get(key);
-    const parsed = pageSections[key].schema.safeParse(row?.content);
+    const saved = row && typeof row.content === "object" && !Array.isArray(row.content) ? row.content : {};
+    const parsed = pageSections[key].schema.safeParse({ ...starterSections[key], ...saved });
     return [key, { content: parsed.success ? parsed.data : starterSections[key], visible: row?.visible ?? true }];
   });
   return Object.fromEntries(entries) as PageSectionMap;

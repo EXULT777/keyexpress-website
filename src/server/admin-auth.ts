@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password";
 import type { Db } from "./db";
 import { checkRateLimit, clearAttempts, recordAttempt, type RateLimitRule } from "./rate-limit";
 
@@ -79,12 +80,16 @@ export async function logIn(
   return { status: "signed-in", session: { adminId: admin.id, sessionVersion: admin.sessionVersion } };
 }
 
-export async function isSessionCurrent(db: Db, session: AdminSession): Promise<boolean> {
-  const admin = await db.admin.findUnique({ where: { id: session.adminId }, select: { sessionVersion: true } });
-  return admin?.sessionVersion === session.sessionVersion;
+// The Admin a login cookie belongs to, or null when the cookie is from before
+// the last password change (or the Admin is gone).
+export async function adminForSession(db: Db, session: AdminSession): Promise<{ id: number; email: string } | null> {
+  const admin = await db.admin.findUnique({
+    where: { id: session.adminId },
+    select: { id: true, email: true, sessionVersion: true },
+  });
+  if (!admin || admin.sessionVersion !== session.sessionVersion) return null;
+  return { id: admin.id, email: admin.email };
 }
-
-export const MIN_PASSWORD_LENGTH = 10;
 
 export type PasswordErrors = Partial<Record<"current" | "next" | "confirm", string>>;
 

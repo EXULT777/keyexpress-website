@@ -10,6 +10,11 @@ export function reorder(ids: number[], id: number, direction: "up" | "down"): { 
   return order.map((itemId, position) => ({ id: itemId, sortOrder: position }));
 }
 
+// Where a newly added item goes: after the last one (or first, in an empty list).
+export function nextSortOrder(highest: number | null): number {
+  return (highest ?? -1) + 1;
+}
+
 // "European & Foreign Vehicles" -> "european-and-foreign-vehicles", made unique
 // among `taken` by adding -2, -3…
 export function uniqueSlug(title: string, taken: Set<string>): string {

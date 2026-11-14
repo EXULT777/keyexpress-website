@@ -1,17 +1,12 @@
 import { Banknote, CreditCard, Mail, Smartphone } from "lucide-react";
 import { createElement } from "react";
 import Link from "next/link";
+import { footerLinks } from "@/lib/navigation";
+import { placeholderValues } from "@/lib/placeholders";
 import type { BusinessSettings } from "@/server/content";
 import { PhoneNumberLink } from "./buttons";
+import { FilledText } from "./filled-text";
 import { Logo } from "./logo";
-
-const footerLinks = [
-  { href: "/services", label: "Services" },
-  { href: "/about", label: "About" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/contact", label: "Contact" },
-  { href: "/privacy-policy", label: "Privacy Policy" },
-];
 
 function paymentIcon(method: string) {
   if (/cash/i.test(method)) return Banknote;
@@ -28,7 +23,9 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
           <div className="inline-block rounded-xl bg-white px-4 py-3">
             <Logo src={settings.logoUrl} name={settings.businessName} />
           </div>
-          <p>{settings.footerText}</p>
+          <p>
+            <FilledText text={settings.footerText} placeholders={placeholderValues(settings)} tone="dark" />
+          </p>
         </div>
 
         <div className="space-y-3">
@@ -48,8 +45,8 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
           <h2 className="text-xl">Pages</h2>
           <ul className="space-y-1">
             {footerLinks.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className="inline-flex min-h-11 items-center text-white underline">
+              <li key={link.path}>
+                <Link href={link.path} className="inline-flex min-h-11 items-center text-white underline">
                   {link.label}
                 </Link>
               </li>

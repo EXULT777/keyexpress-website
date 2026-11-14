@@ -4,6 +4,7 @@ import { ButtonLink, CallButton } from "@/components/site/buttons";
 import { FilledText, Paragraphs } from "@/components/site/filled-text";
 import { PageHeader } from "@/components/site/site-chrome";
 import { NamedIcon } from "@/lib/icons";
+import { fillPlaceholders } from "@/lib/placeholders";
 import { pageMetadata } from "@/server/page-metadata";
 import { getPlaceholderValues, getSections, getSettings, getVisibleServices } from "@/server/site-data";
 
@@ -12,7 +13,7 @@ export function generateMetadata() {
 }
 
 export default async function ServicesPage() {
-  const [settings, sections, services, values] = await Promise.all([
+  const [settings, sections, services, placeholders] = await Promise.all([
     getSettings(),
     getSections(),
     getVisibleServices(),
@@ -22,9 +23,9 @@ export default async function ServicesPage() {
 
   return (
     <>
-      <PageHeader title={intro.heading}>
+      <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
         <p>
-          <FilledText text={intro.text} values={values} />
+          <FilledText text={intro.text} placeholders={placeholders} />
         </p>
       </PageHeader>
 
@@ -32,7 +33,7 @@ export default async function ServicesPage() {
         <nav aria-labelledby="service-list-heading" className="border-b-2 border-silver bg-white">
           <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
             <h2 id="service-list-heading" className="text-xl">
-              Jump to a service
+              {fillPlaceholders(intro.jumpHeading, placeholders)}
             </h2>
             <ul className="mt-4 grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
@@ -67,7 +68,7 @@ export default async function ServicesPage() {
                   {service.title}
                 </h2>
               </div>
-              <Paragraphs text={service.longDescription} values={values} className="mt-4" />
+              <Paragraphs text={service.longDescription} placeholders={placeholders} className="mt-4" />
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <CallButton phone={settings.phone} label="Call for this service" />
                 <ButtonLink href="/contact#request" variant="secondary">

@@ -67,7 +67,12 @@ export function AdminNav({ newRequests }: { newRequests: number }) {
                 <Icon aria-hidden="true" className="size-6 shrink-0" />
                 <span className="flex-1">{label}</span>
                 {href === "/admin/requests" && newRequests > 0 && (
-                  <span className="rounded-full bg-emergency px-2.5 py-0.5 text-base text-white">
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-0.5 text-base",
+                      current ? "bg-white text-action" : "bg-action text-white",
+                    )}
+                  >
                     {newRequests} new
                   </span>
                 )}

@@ -9,23 +9,14 @@ import { IDLE, type ActionResult } from "@/lib/action-result";
 import { cn } from "@/lib/cn";
 import { telHref } from "@/lib/phone";
 import { statusLabels, type RequestStatus } from "@/lib/service-request";
+import type { ServiceRequestRecord } from "@/server/service-requests";
 import { deleteRequest, setRequestStatus } from "./actions";
 
-export type InboxRequest = {
-  id: number;
-  receivedAt: string;
-  fullName: string;
-  phone: string;
-  email: string;
-  service: string;
-  address: string;
-  message: string;
-  emergency: boolean;
-  status: RequestStatus;
-};
+// A Service Request as the browser gets it: the date travels as text.
+export type InboxRequest = Omit<ServiceRequestRecord, "createdAt"> & { receivedAt: string };
 
 const smallButton =
-  "inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-silver bg-white px-3 font-bold text-navy hover:border-action hover:text-action disabled:opacity-40";
+  "inline-flex min-h-14 items-center gap-2 rounded-xl border-2 border-silver bg-white px-3 font-bold text-navy hover:border-action hover:text-action disabled:opacity-40";
 
 const nextSteps: Record<RequestStatus, { status: RequestStatus; label: string }[]> = {
   NEW: [
@@ -67,7 +58,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
                 setConfirming(null);
                 act(() => deleteRequest(request.id));
               }}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-error px-4 font-bold text-white"
+              className="inline-flex min-h-14 items-center gap-2 rounded-xl bg-error px-4 font-bold text-white"
             >
               <Trash2 aria-hidden="true" className="size-5" /> Yes, delete it
             </button>
@@ -132,7 +123,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
                     <LocalTime iso={request.receivedAt} />
                     {request.emergency && (
                       <div className="mt-2">
-                        <EmergencyBadge />
+                        <EmergencyFlag />
                       </div>
                     )}
                   </td>
@@ -171,7 +162,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
                 )}
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  {request.emergency && <EmergencyBadge />}
+                  {request.emergency && <EmergencyFlag />}
                   <Status request={request} />
                 </div>
                 <h2 className="mt-3 text-xl">{request.fullName}</h2>
@@ -238,7 +229,8 @@ function Status({ request }: { request: InboxRequest }) {
   );
 }
 
-function EmergencyBadge() {
+// Marks a Service Request the Customer flagged as an Emergency.
+function EmergencyFlag() {
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-emergency px-3 py-1 font-bold text-white">
       <Siren aria-hidden="true" className="size-5" /> EMERGENCY

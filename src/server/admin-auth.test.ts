@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { changeAdminPassword, isSessionCurrent, logIn } from "./admin-auth";
+import { adminForSession, changeAdminPassword, logIn } from "./admin-auth";
 import { createTestDatabase } from "./test-support/test-db";
 
 const owner = { email: "owner@example.com", password: "correct horse battery" };
@@ -89,8 +89,9 @@ describe("changing the Admin password", () => {
       confirm: "a brand new password",
     });
 
-    expect(result.status).toBe("changed");
-    expect(await isSessionCurrent(db, signedIn.session)).toBe(false);
+    if (result.status !== "changed") throw new Error("expected the password to change");
+    expect(await adminForSession(db, signedIn.session)).toBeNull();
+    expect(await adminForSession(db, result.session)).toEqual({ id: signedIn.session.adminId, email: owner.email });
     expect((await logIn(db, { email: owner.email, password: "a brand new password" }, from)).status).toBe("signed-in");
     expect((await logIn(db, owner, from)).status).toBe("wrong");
   });

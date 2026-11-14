@@ -14,6 +14,26 @@ test.describe("the public website", () => {
     });
   }
 
+  test("no page scrolls sideways on a tablet or a small laptop", async ({ page }) => {
+    for (const width of [768, 1024]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const path of pages) {
+        await page.goto(path);
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(overflow, `${path} at ${width}px`).toBe(0);
+      }
+    }
+  });
+
+  test("the big phone number is in the header at every desktop width", async ({ page }) => {
+    for (const width of [1024, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      await expect(page.locator("header").getByRole("link", { name: "(555) 014-7823", exact: true }).filter({ visible: true })).toHaveCount(1);
+      await expect(page.locator("header").getByRole("link", { name: /Call Now/ })).toBeInViewport();
+    }
+  });
+
   test("the sticky call bar is on phones and goes away on large screens", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/services");

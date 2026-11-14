@@ -29,7 +29,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             <a
               href="/"
               target="_blank"
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl px-3 text-lg font-bold text-white underline"
+              className="inline-flex min-h-14 items-center gap-2 rounded-xl px-3 text-lg font-bold text-white underline"
             >
               View website
               <ExternalLink aria-hidden="true" className="size-5" />
@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             <form action={logOutAction}>
               <button
                 type="submit"
-                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-4 text-lg font-bold text-navy hover:bg-silver-soft"
+                className="inline-flex min-h-14 items-center gap-2 rounded-xl bg-white px-4 text-lg font-bold text-navy hover:bg-silver-soft"
               >
                 <LogOut aria-hidden="true" className="size-5" />
                 Log out

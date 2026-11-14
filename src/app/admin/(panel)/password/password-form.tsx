@@ -2,6 +2,7 @@
 
 import { errorFor, SaveRow, TextField } from "@/components/admin/form-parts";
 import { useAdminForm } from "@/components/admin/use-admin-form";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { changePassword } from "./actions";
 
 export function PasswordForm() {
@@ -13,7 +14,7 @@ export function PasswordForm() {
       <TextField
         name="next"
         label="New password"
-        hint="At least 10 characters. A short sentence you'll remember, like “blue truck parks on Elm”, works well."
+        hint={`At least ${MIN_PASSWORD_LENGTH} characters. A short sentence you'll remember, like “blue truck parks on Elm”, works well.`}
         type="password"
         autoComplete="new-password"
         error={errorFor(state, "next")}

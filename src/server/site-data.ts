@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { placeholderValues } from "@/lib/placeholders";
 import { getBusinessSettings, getPageSections, getPrivacyPolicy, listFaqs, listPageSeo, listServices } from "./content";
 import { db } from "./db";
 
@@ -13,6 +14,5 @@ export const getPolicy = cache(() => getPrivacyPolicy(db));
 export const getAllPageSeo = cache(() => listPageSeo(db));
 
 export async function getPlaceholderValues() {
-  const settings = await getSettings();
-  return { phone: settings.phone, email: settings.email, city: settings.serviceAreaCity };
+  return placeholderValues(await getSettings());
 }

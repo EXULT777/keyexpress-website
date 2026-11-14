@@ -22,7 +22,7 @@ export default async function AdminLoginPage() {
         <h1 className="mt-8 text-[2rem] font-extrabold">Admin login</h1>
         {adminCount === 0 ? (
           <div role="alert" className="mt-6 rounded-xl border-4 border-error p-5">
-            <p className="text-xl font-bold text-error">No Admin account has been set up yet.</p>
+            <p className="text-xl font-bold text-error">No Admin login has been set up yet.</p>
             <p className="mt-2">
               Set <code className="font-bold">ADMIN_EMAIL</code> and <code className="font-bold">ADMIN_PASSWORD</code> in
               the hosting&apos;s environment variables, then restart the website. See DEPLOY.md.

@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { errorsFromIssues, invalid, saved, type ActionResult } from "@/lib/action-result";
 import { isFullPhoneNumber } from "@/lib/phone";
@@ -8,6 +7,7 @@ import { requireAdmin } from "@/server/admin-session";
 import { db } from "@/server/db";
 import { checked, email, entries, file, optional, required, text } from "@/server/form-data";
 import { dataDir } from "@/server/paths";
+import { refreshPublicSite } from "@/server/refresh";
 import { deleteUpload, saveUpload } from "@/server/uploads";
 
 const settingsSchema = z.object({
@@ -51,7 +51,7 @@ export async function saveBusinessSettings(_previous: ActionResult, formData: Fo
   if (!parsed.success) return invalid(errorsFromIssues(parsed.error.issues));
 
   await db.businessSettings.update({ where: { id: 1 }, data: parsed.data });
-  revalidatePath("/", "layout");
+  refreshPublicSite();
   return saved();
 }
 
@@ -60,13 +60,13 @@ export async function uploadLogo(_previous: ActionResult, formData: FormData): P
   const logo = file(formData, "logo");
   if (!logo) return invalid({ logo: "Please choose a picture first." });
 
-  const result = await saveUpload(dataDir(), { name: logo.name, bytes: new Uint8Array(await logo.arrayBuffer()) }, "logo");
+  const result = await saveUpload(dataDir(), new Uint8Array(await logo.arrayBuffer()), "logo");
   if (!result.ok) return invalid({ logo: result.error });
 
   const before = await db.businessSettings.findUniqueOrThrow({ where: { id: 1 }, select: { logoPath: true } });
   await db.businessSettings.update({ where: { id: 1 }, data: { logoPath: result.url } });
   await deleteUpload(dataDir(), before.logoPath);
-  revalidatePath("/", "layout");
+  refreshPublicSite();
   return saved("New logo saved ✓");
 }
 
@@ -75,6 +75,6 @@ export async function restoreDefaultLogo(): Promise<ActionResult> {
   const before = await db.businessSettings.findUniqueOrThrow({ where: { id: 1 }, select: { logoPath: true } });
   await db.businessSettings.update({ where: { id: 1 }, data: { logoPath: null } });
   await deleteUpload(dataDir(), before.logoPath);
-  revalidatePath("/", "layout");
+  refreshPublicSite();
   return saved("Default logo restored ✓");
 }

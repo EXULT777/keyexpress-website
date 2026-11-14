@@ -23,6 +23,7 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
     text: "Key Express is a mobile locksmith serving {city} and nearby areas. We come straight to you, for cars, homes, and businesses.",
     callButton: "Get Help Now",
     requestButton: "Request Service",
+    phoneIntro: "Call us any time, day or night:",
   },
   "home.emergency": {
     heading: "Emergency Lockout? We're Available Day and Night",
@@ -37,6 +38,7 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
   "home.about": {
     heading: "Locksmith Help That Comes to You",
     text: "Key Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business. We're known for handling the difficult jobs: the advanced car keys and tricky locks that other companies often turn down.",
+    button: "More about us",
   },
   "home.whyChooseUs": {
     heading: "Why Choose Us",
@@ -51,6 +53,8 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
   "home.services": {
     heading: "Our Services",
     text: "Whatever lock or key you need help with, we bring the tools to you.",
+    cardLink: "Call for this service",
+    button: "See all services in detail",
   },
   "home.fobHighlight": {
     heading: "Need a New Key Fob? Get It Done Today",
@@ -78,6 +82,7 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
   "services.intro": {
     heading: "Our Services",
     text: "We're a fully mobile locksmith, so every service below comes to you: at home, at work, or wherever your car is parked. Not sure what you need? Call us at {phone} and we'll help you figure it out.",
+    jumpHeading: "Jump to a service",
   },
   "about.intro": {
     heading: "About Key Express",
@@ -91,6 +96,8 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
   "faq.intro": {
     heading: "Frequently Asked Questions",
     text: "Here are answers to the questions we hear most. If you don't see yours, call us at {phone}.",
+    closingHeading: "Still have a question?",
+    closingText: "Call us any time. We're happy to help.",
   },
   "contact.intro": {
     heading: "Contact Us",

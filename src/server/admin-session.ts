@@ -2,7 +2,7 @@ import "server-only";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { AdminSession } from "./admin-auth";
+import { adminForSession, type AdminSession } from "./admin-auth";
 import { db } from "./db";
 import { sessionSecret } from "./session-secret";
 import { siteUrl } from "./site-url";
@@ -42,9 +42,7 @@ export type SignedInAdmin = { id: number; email: string };
 export async function currentAdmin(): Promise<SignedInAdmin | null> {
   const { adminId, sessionVersion } = await session();
   if (adminId === undefined || sessionVersion === undefined) return null;
-  const admin = await db.admin.findUnique({ where: { id: adminId }, select: { id: true, email: true, sessionVersion: true } });
-  if (!admin || admin.sessionVersion !== sessionVersion) return null;
-  return { id: admin.id, email: admin.email };
+  return adminForSession(db, { adminId, sessionVersion });
 }
 
 // Every Admin page, server action and route handler calls this first: checking

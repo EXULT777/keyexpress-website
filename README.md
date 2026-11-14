@@ -81,7 +81,7 @@ e2e/                    # click-through tests
 
 - **Data lives outside the code.** The database, uploaded images and the session key live in `DATA_DIR`, so uploading a new version of the site never touches them. When the server starts, it applies any new database changes, adds the starter content the very first time, and creates the Admin if there isn't one. See [ADR 0002](docs/adr/0002-data-folder-outside-the-code.md).
 - **SQLite through libsql**, because it runs on shared hosting's older Linux. See [ADR 0001](docs/adr/0001-sqlite-through-libsql.md).
-- **Text placeholders.** Admin text can include `{phone}`, `{email}` and `{city}`; the site fills in the current Business Settings, and phone numbers become tap-to-call links.
+- **Text placeholders.** Text in Page Content, Services, Questions (FAQ), the footer, Search & Sharing and the Privacy Policy can include `{phone}`, `{email}` and `{city}`. The site fills in the current Business Settings, and in longer text phone numbers become tap-to-call links.
 - **Words.** [`GLOSSARY.md`](GLOSSARY.md) defines the terms used in the code and Admin (Service Request, Page Section, Business Account…).
 
 ### Security
@@ -95,8 +95,8 @@ e2e/                    # click-through tests
 
 ## Testing
 
-- `npm test`: 43 tests covering database setup (including several server processes starting at once), the Request Service form, login and passwords, rate limiting, uploads, Markdown cleaning, the CSV download and the notification email.
-- `npm run test:e2e`: 26 browser tests against the real upload folder on an empty database, covering every public page at phone size, keyboard use, the request form through to the inbox, and every Admin feature.
+- `npm test`: 44 tests covering database setup (including several server processes starting at once), Page Sections, the Request Service form, login and passwords, rate limiting, uploads, Markdown cleaning, the CSV download and the notification email.
+- `npm run test:e2e`: 31 browser tests against the real upload folder on an empty database, covering every public page at phone, tablet and laptop sizes, keyboard use, the request form through to the inbox, and every Admin feature.
 - Lighthouse (mobile) on the production build: 100 for Performance, Accessibility, Best Practices and SEO on every public page.
 
 ## Deploying

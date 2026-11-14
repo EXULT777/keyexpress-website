@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { CheckboxField, errorFor, FieldError, SaveRow, TextField } from "@/components/admin/form-parts";
+import { CheckboxField, errorFor, SaveRow, TextField } from "@/components/admin/form-parts";
 import { IconSelect } from "@/components/admin/icon-select";
+import { ImagePicker } from "@/components/admin/image-picker";
 import { useAdminForm } from "@/components/admin/use-admin-form";
 import type { ActionResult } from "@/lib/action-result";
 
@@ -25,7 +25,6 @@ export function ServiceForm({
   isNew: boolean;
 }) {
   const { state, onSubmit, pending } = useAdminForm(action);
-  const [preview, setPreview] = useState<string | null>(null);
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-8">
@@ -50,40 +49,15 @@ export function ServiceForm({
       />
       <IconSelect id="service-icon" name="icon" label="Icon" defaultValue={values.icon} />
 
-      <fieldset>
-        <legend className="text-lg font-bold text-navy">Picture (optional)</legend>
-        <p className="mt-1 text-ink-soft">Shown next to the description on the Services page. PNG, JPG, WebP or SVG, up to 2 MB.</p>
-        {values.imageUrl && (
-          <div className="mt-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={values.imageUrl} alt="The picture now" className="aspect-[4/3] w-60 rounded-xl border-2 border-silver object-cover" />
-            <div className="mt-3">
-              <CheckboxField name="removeImage" label="Remove this picture" />
-            </div>
-          </div>
-        )}
-        <label htmlFor="service-image" className="mt-4 block font-bold text-navy">
-          {values.imageUrl ? "Or choose a new picture" : "Choose a picture"}
-        </label>
-        <input
-          id="service-image"
-          name="image"
-          type="file"
-          accept="image/png,image/jpeg,image/webp,image/svg+xml"
-          aria-invalid={Boolean(errorFor(state, "image"))}
-          aria-describedby="service-image-error"
-          onChange={(event) => {
-            const chosen = event.target.files?.[0];
-            setPreview(chosen ? URL.createObjectURL(chosen) : null);
-          }}
-          className="mt-2 block w-full rounded-xl border-2 border-ink-soft bg-white p-3 text-lg file:mr-4 file:min-h-12 file:rounded-lg file:border-0 file:bg-silver-light file:px-4 file:font-bold file:text-navy"
-        />
-        {preview && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="The new picture (not saved yet)" className="mt-3 aspect-[4/3] w-60 rounded-xl border-2 border-action object-cover" />
-        )}
-        <FieldError id="service-image-error" error={errorFor(state, "image")} />
-      </fieldset>
+      <ImagePicker
+        id="service-image"
+        legend="Picture (optional)"
+        hint="Shown next to the description on the Services page. PNG, JPG, WebP or SVG, up to 2 MB."
+        currentUrl={values.imageUrl}
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+        shape="aspect-[4/3]"
+        error={errorFor(state, "image")}
+      />
 
       <CheckboxField name="visible" label="Show this service on the website" defaultChecked={values.visible} />
       <SaveRow state={state} pending={pending} label={isNew ? "Add this service" : "Save changes"} />

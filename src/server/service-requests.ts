@@ -111,10 +111,10 @@ export async function listServiceRequests(db: Db): Promise<ServiceRequestRecord[
 
 export async function countServiceRequests(db: Db, now = new Date()) {
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60_000);
-  const [fresh, emergencies, lastWeek] = await Promise.all([
+  const [newRequests, newEmergencies, lastSevenDays] = await Promise.all([
     db.serviceRequest.count({ where: { status: "NEW" } }),
     db.serviceRequest.count({ where: { status: "NEW", emergency: true } }),
     db.serviceRequest.count({ where: { createdAt: { gte: weekAgo } } }),
   ]);
-  return { fresh, emergencies, lastWeek };
+  return { newRequests, newEmergencies, lastSevenDays };
 }

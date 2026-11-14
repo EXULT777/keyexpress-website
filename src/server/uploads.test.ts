@@ -28,7 +28,7 @@ describe("uploading an image", () => {
   test("a PNG logo is stored and can be read back as an image", async () => {
     const dir = await dataDir();
 
-    const result = await saveUpload(dir, { name: "my logo.png", bytes: await png(400, 100) }, "logo");
+    const result = await saveUpload(dir, await png(400, 100), "logo");
 
     if (!result.ok) throw new Error(result.error);
     expect(result.url).toMatch(/^\/uploads\/[a-z0-9-]+\.webp$/);
@@ -41,15 +41,15 @@ describe("uploading an image", () => {
     const big = Buffer.alloc(2 * 1024 * 1024 + 1);
     (await png(10, 10)).copy(big);
 
-    const result = await saveUpload(dir, { name: "photo.png", bytes: big }, "service");
+    const result = await saveUpload(dir, big, "service");
 
     expect(result).toEqual({ ok: false, error: "That file is too big. Please choose an image smaller than 2 MB." });
   });
 
-  test("a file that isn't a picture is refused, whatever its name", async () => {
+  test("a file that isn't really a picture is refused", async () => {
     const dir = await dataDir();
 
-    const result = await saveUpload(dir, { name: "logo.png", bytes: Buffer.from("just some text") }, "logo");
+    const result = await saveUpload(dir, Buffer.from("just some text"), "logo");
 
     expect(result).toEqual({ ok: false, error: "Please choose a PNG, JPG, WebP or SVG image." });
   });
@@ -62,7 +62,7 @@ describe("uploading an image", () => {
         <a href="javascript:alert(2)"><path d="M0 0h10v10z" fill="#0b2545" onclick="alert(3)"/></a>
       </svg>`;
 
-    const result = await saveUpload(dir, { name: "logo.svg", bytes: Buffer.from(svg) }, "logo");
+    const result = await saveUpload(dir, Buffer.from(svg), "logo");
 
     if (!result.ok) throw new Error(result.error);
     const stored = await readUpload(dir, nameOf(result.url));
@@ -77,7 +77,7 @@ describe("uploading an image", () => {
     const dir = await dataDir();
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h10v10z"/></svg>';
 
-    const result = await saveUpload(dir, { name: "share.svg", bytes: Buffer.from(svg) }, "social");
+    const result = await saveUpload(dir, Buffer.from(svg), "social");
 
     expect(result).toEqual({ ok: false, error: "Please choose a PNG, JPG or WebP picture. Social sites can't show SVGs." });
   });
@@ -85,7 +85,7 @@ describe("uploading an image", () => {
   test("a very large photo is shrunk to at most 1600 pixels wide", async () => {
     const dir = await dataDir();
 
-    const result = await saveUpload(dir, { name: "van.png", bytes: await png(3000, 2000) }, "service");
+    const result = await saveUpload(dir, await png(3000, 2000), "service");
 
     if (!result.ok) throw new Error(result.error);
     const stored = await readUpload(dir, nameOf(result.url));

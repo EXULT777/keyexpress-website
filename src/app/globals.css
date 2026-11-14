@@ -60,6 +60,10 @@
     outline-color: #ffffff;
   }
 
+  .on-dark .on-light :focus-visible {
+    outline-color: var(--color-action);
+  }
+
   summary {
     cursor: pointer;
     list-style: none;

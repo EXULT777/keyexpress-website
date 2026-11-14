@@ -6,6 +6,7 @@ import path from "node:path";
 import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
 
+// Same as src/lib/password.ts (this script runs without TypeScript).
 const MIN_PASSWORD_LENGTH = 10;
 
 const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();

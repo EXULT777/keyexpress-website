@@ -27,12 +27,12 @@ export function RequestServiceForm({
   services,
   buttonLabel,
   successMessage,
-  values: placeholders,
+  placeholders,
 }: {
   services: string[];
   buttonLabel: string;
   successMessage: string;
-  values: PlaceholderValues;
+  placeholders: PlaceholderValues;
 }) {
   const [state, formAction, pending] = useActionState(sendServiceRequest, { status: "idle" } as RequestFormState);
   // "Send another request" brings the form back after a request was sent.
@@ -56,7 +56,7 @@ export function RequestServiceForm({
       >
         <CircleCheck aria-hidden="true" className="mx-auto size-16 text-success" />
         <p className="mt-4 text-2xl font-bold text-navy">
-          <FilledText text={successMessage} values={placeholders} />
+          <FilledText text={successMessage} placeholders={placeholders} />
         </p>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
           <CallButton phone={placeholders.phone} />
@@ -115,7 +115,7 @@ export function RequestServiceForm({
           This is an emergency
         </label>
         <p className="mt-2 pl-11">
-          In an emergency, calling us at <FilledText text="{phone}" values={placeholders} /> is the fastest way to get
+          In an emergency, calling us at <FilledText text="{phone}" placeholders={placeholders} /> is the fastest way to get
           help.
         </p>
       </div>
@@ -202,7 +202,7 @@ function ProblemSummary({
             : "Sorry, something went wrong and your request was not sent."}
         </p>
         <p className="mt-2">
-          Please call us at <FilledText text="{phone}" values={placeholders} /> so we can help you right away.
+          Please call us at <FilledText text="{phone}" placeholders={placeholders} /> so we can help you right away.
         </p>
       </div>
     );

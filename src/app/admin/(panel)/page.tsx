@@ -18,7 +18,7 @@ const shortcuts = [
 
 export default async function DashboardPage() {
   await requireAdmin();
-  const { fresh: newCount, emergencies: emergencyCount, lastWeek: weekCount } = await countServiceRequests(db);
+  const { newRequests, newEmergencies, lastSevenDays } = await countServiceRequests(db);
 
   return (
     <>
@@ -28,26 +28,26 @@ export default async function DashboardPage() {
 
       <ul className="grid gap-4 sm:grid-cols-3">
         <li className="rounded-2xl border-2 border-silver bg-white p-6">
-          <p className="text-5xl font-extrabold text-navy">{newCount}</p>
+          <p className="text-5xl font-extrabold text-navy">{newRequests}</p>
           <p className="mt-2 text-lg font-bold">New service requests</p>
         </li>
         <li
           className={
-            emergencyCount > 0
+            newEmergencies > 0
               ? "rounded-2xl border-4 border-emergency bg-white p-6"
               : "rounded-2xl border-2 border-silver bg-white p-6"
           }
         >
-          <p className={emergencyCount > 0 ? "text-5xl font-extrabold text-emergency" : "text-5xl font-extrabold text-navy"}>
-            {emergencyCount}
+          <p className={newEmergencies > 0 ? "text-5xl font-extrabold text-emergency" : "text-5xl font-extrabold text-navy"}>
+            {newEmergencies}
           </p>
           <p className="mt-2 flex items-center gap-2 text-lg font-bold">
-            {emergencyCount > 0 && <Siren aria-hidden="true" className="size-6 text-emergency" />}
+            {newEmergencies > 0 && <Siren aria-hidden="true" className="size-6 text-emergency" />}
             New emergencies
           </p>
         </li>
         <li className="rounded-2xl border-2 border-silver bg-white p-6">
-          <p className="text-5xl font-extrabold text-navy">{weekCount}</p>
+          <p className="text-5xl font-extrabold text-navy">{lastSevenDays}</p>
           <p className="mt-2 text-lg font-bold">Requests in the last 7 days</p>
         </li>
       </ul>

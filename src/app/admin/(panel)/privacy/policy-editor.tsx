@@ -34,7 +34,8 @@ export function PolicyEditor({ markdown, initialPreview }: { markdown: string; i
           <div id="policy-help" className="mt-1 text-ink-soft">
             <p>
               Start a line with <strong>## </strong> for a heading and <strong>- </strong> for a bullet point. Put words
-              between <strong>**two stars**</strong> to make them bold. {"{phone}"} and {"{email}"} fill in your details.
+              between <strong>**two stars**</strong> to make them bold. {"{phone}"}, {"{email}"} and {"{city}"} fill in your
+              details from Business Settings.
             </p>
           </div>
           <textarea

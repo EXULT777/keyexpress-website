@@ -1,7 +1,7 @@
 import { Marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import { telHref } from "@/lib/phone";
-import type { PlaceholderValues } from "@/lib/placeholders";
+import { splitPlaceholders, type PlaceholderValues } from "@/lib/placeholders";
 
 const marked = new Marked({ gfm: true });
 
@@ -20,11 +20,21 @@ function escapeLinkText(text: string) {
   return text.replace(/[[\]\\]/g, "\\$&");
 }
 
-export function renderMarkdown(markdown: string, values: PlaceholderValues): string {
-  const filled = markdown
-    .replaceAll("{phone}", `[${escapeLinkText(values.phone)}](${telHref(values.phone)})`)
-    .replaceAll("{email}", `[${escapeLinkText(values.email)}](mailto:${values.email})`)
-    .replaceAll("{city}", values.city);
+export function renderMarkdown(markdown: string, placeholders: PlaceholderValues): string {
+  const filled = splitPlaceholders(markdown)
+    .map((part) => {
+      switch (part.kind) {
+        case "text":
+          return part.text;
+        case "phone":
+          return `[${escapeLinkText(placeholders.phone)}](${telHref(placeholders.phone)})`;
+        case "email":
+          return `[${escapeLinkText(placeholders.email)}](mailto:${placeholders.email})`;
+        case "city":
+          return placeholders.city;
+      }
+    })
+    .join("");
   const html = marked.parse(filled, { async: false });
   return sanitizeHtml(html, allowed).trim();
 }

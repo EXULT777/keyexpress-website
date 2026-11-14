@@ -1,11 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { errorsFromIssues, invalid, saved, type ActionResult } from "@/lib/action-result";
-import { isSectionKey, pageSections } from "@/lib/page-sections";
+import { isHomeSection, isSectionKey, pageSections } from "@/lib/page-sections";
 import { requireAdmin } from "@/server/admin-session";
 import { db } from "@/server/db";
 import { checked, text } from "@/server/form-data";
+import { refreshPublicSite } from "@/server/refresh";
 
 // Badges arrive as badges.0.title, badges.0.text, badges.0.icon, badges.1.title…
 function badgesFrom(formData: FormData) {
@@ -36,12 +36,12 @@ export async function savePageSection(key: string, _previous: ActionResult, form
   if (!parsed.success) return invalid(errorsFromIssues(parsed.error.issues));
 
   // Only Home Sections can be hidden; every other section always shows.
-  const visible = section.page === "home" ? checked(formData, "visible") : true;
+  const visible = isHomeSection(key) ? checked(formData, "visible") : true;
   await db.pageSection.upsert({
     where: { key },
     create: { key, content: parsed.data, visible },
     update: { content: parsed.data, visible },
   });
-  revalidatePath("/", "layout");
+  refreshPublicSite();
   return saved();
 }

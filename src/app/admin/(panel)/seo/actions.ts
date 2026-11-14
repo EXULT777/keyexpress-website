@@ -1,13 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { errorsFromIssues, invalid, saved, type ActionResult } from "@/lib/action-result";
 import { requireAdmin } from "@/server/admin-session";
 import { db } from "@/server/db";
-import { checked, file, required, text } from "@/server/form-data";
+import { required, text } from "@/server/form-data";
 import { dataDir } from "@/server/paths";
-import { deleteUpload, saveUpload } from "@/server/uploads";
+import { refreshPublicSite } from "@/server/refresh";
+import { deleteUpload, imageFromForm } from "@/server/uploads";
 
 const seoSchema = z.object({
   title: required("a page title", 120),
@@ -22,18 +22,12 @@ export async function savePageSeo(path: string, _previous: ActionResult, formDat
   const parsed = seoSchema.safeParse({ title: text(formData, "title"), description: text(formData, "description") });
   if (!parsed.success) return invalid(errorsFromIssues(parsed.error.issues));
 
-  const image = file(formData, "image");
-  let ogImagePath: string | null | undefined;
-  if (image) {
-    const upload = await saveUpload(dataDir(), { name: image.name, bytes: new Uint8Array(await image.arrayBuffer()) }, "social");
-    if (!upload.ok) return invalid({ image: upload.error });
-    ogImagePath = upload.url;
-  } else if (checked(formData, "removeImage")) {
-    ogImagePath = null;
-  }
+  const image = await imageFromForm(dataDir(), formData, "social");
+  if (!image.ok) return invalid({ image: image.error });
+  const ogImagePath = image.imagePath;
 
   await db.pageSeo.update({ where: { path }, data: { ...parsed.data, ...(ogImagePath !== undefined && { ogImagePath }) } });
   if (ogImagePath !== undefined) await deleteUpload(dataDir(), before.ogImagePath);
-  revalidatePath("/", "layout");
+  refreshPublicSite();
   return saved();
 }

@@ -3,15 +3,16 @@
 
 export type PlaceholderValues = { phone: string; email: string; city: string };
 
-const TOKEN = /\{(phone|email|city)\}/g;
-
-export function fillPlaceholders(text: string, values: PlaceholderValues): string {
-  return text.replace(TOKEN, (_, name: keyof PlaceholderValues) => values[name]);
+export function placeholderValues(settings: { phone: string; email: string; serviceAreaCity: string }): PlaceholderValues {
+  return { phone: settings.phone, email: settings.email, city: settings.serviceAreaCity };
 }
 
 export type TextPart = { kind: "text"; text: string } | { kind: "phone" } | { kind: "email" } | { kind: "city" };
 
-// For rendering: phone and email become links, so they're returned as their own parts.
+const TOKEN = /\{(phone|email|city)\}/g;
+
+// The one place that finds placeholders. Callers decide how each part is shown:
+// plain text, a link, or Markdown.
 export function splitPlaceholders(text: string): TextPart[] {
   const parts: TextPart[] = [];
   let last = 0;
@@ -22,6 +23,13 @@ export function splitPlaceholders(text: string): TextPart[] {
   }
   if (last < text.length) parts.push({ kind: "text", text: text.slice(last) });
   return parts;
+}
+
+// For plain text such as headings, button labels and page titles.
+export function fillPlaceholders(text: string, values: PlaceholderValues): string {
+  return splitPlaceholders(text)
+    .map((part) => (part.kind === "text" ? part.text : values[part.kind]))
+    .join("");
 }
 
 export function toParagraphs(text: string): string[] {
