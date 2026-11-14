@@ -55,7 +55,7 @@ Under **Environment variables**, click **ADD VARIABLE** for each of these:
 
 | Name | Value |
 | --- | --- |
-| `DATA_DIR` | the full path from step 2, e.g. `/home/johnsmith/keyexpress-data` |
+| `DATA_DIR` | the full path from step 2, e.g. `/home/johnsmith/keyexpress-data`. It must start with `/home/`; a short name like `data` would put your database inside the app folder, where an update could delete it |
 | `SITE_URL` | your address, exactly as people should see it, e.g. `https://www.keyexpress.com` |
 | `ADMIN_EMAIL` | the email you'll log in with |
 | `ADMIN_PASSWORD` | a password of at least 10 characters. A short sentence is easy to remember |
@@ -75,10 +75,11 @@ Email is optional (see *Email for new requests* below). Then click **CREATE** (o
 
 ## Updating the site later
 
-1. On your computer: `npm ci`, `npm run build`, `npm run bundle`, and zip `deploy/` as in step 1.
-2. In **File Manager**, open `keyexpress`, select everything in it and delete it. This is safe: your data is in `keyexpress-data`.
-3. Upload and extract the new zip as in step 3.
-4. In **Setup Node.js App**, click **RESTART** on the app.
+1. **First, check where your data is.** In **Setup Node.js App**, open the app and look at `DATA_DIR`. It must be a full path starting with `/home/` and pointing outside the `keyexpress` folder, e.g. `/home/johnsmith/keyexpress-data`. If it's missing or doesn't start with `/home/`, **stop**: your database is inside the app folder, and the steps below could delete it. Back up the app folder first (see *Backups*), then set `DATA_DIR` as in step 4 and move the `data` folder's contents into it.
+2. On your computer: `npm ci`, `npm run build`, `npm run bundle`, and zip `deploy/` as in step 1.
+3. In **File Manager**, open `keyexpress` and delete only the `.next` and `node_modules` folders (they never hold your data). This clears out files from the old version.
+4. Upload the new zip into `keyexpress` and **Extract** it. It replaces the old files.
+5. In **Setup Node.js App**, click **RESTART** on the app.
 
 If the new version changes the database, those changes are applied automatically when it starts. Your content, uploaded images and service requests stay as they were.
 

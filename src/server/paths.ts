@@ -20,7 +20,9 @@ export function uploadsDir(dir: string = dataDir()): string {
   return path.join(/*turbopackIgnore: true*/ dir, "uploads");
 }
 
-// The migration SQL files ship next to the server (see scripts/bundle.mjs).
+// The migration SQL files ship next to the server: scripts/bundle.mjs copies
+// them, so the build mustn't trace this path (it would also pick up old copies
+// inside deploy/).
 export function migrationsDir(): string {
-  return path.join(process.cwd(), "prisma", "migrations");
+  return path.join(/*turbopackIgnore: true*/ process.cwd(), "prisma", "migrations");
 }

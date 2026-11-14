@@ -53,7 +53,8 @@ async function applyMigrations(dataDir: string, dir: string) {
       "applied_steps_count"   INTEGER UNSIGNED NOT NULL DEFAULT 0
     )`);
 
-    const names = (await readdir(dir, { withFileTypes: true }))
+    // The folder is only known when the server runs; the build mustn't trace it.
+    const names = (await readdir(/*turbopackIgnore: true*/ dir, { withFileTypes: true }))
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
       .sort();
@@ -70,7 +71,7 @@ async function applyMigrations(dataDir: string, dir: string) {
 
       for (const name of names) {
         if (done.has(name)) continue;
-        const file = await readFile(path.join(dir, name, "migration.sql"));
+        const file = await readFile(path.join(/*turbopackIgnore: true*/ dir, name, "migration.sql"));
         const startedAt = Date.now();
         await tx.executeMultiple(file.toString("utf8"));
         await tx.execute({
