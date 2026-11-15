@@ -1,0 +1,2005 @@
+diff --git a/README.md b/README.md
+index 29f8bce..70ab83c 100644
+--- a/README.md
++++ b/README.md
+@@ -7,7 +7,7 @@ Built from the project brief in [`docs/spec.md`](docs/spec.md).
+ ## What's in it
+ 
+ **The public website**
+-- Home, Services, About, FAQ, Contact and Privacy Policy pages, plus a friendly "page not found" page.
++- Home, About, Contact and Privacy Policy pages, plus a friendly "page not found" page. Services and FAQ are sections of the home page, and their menu links scroll to them (the old /services and /faq addresses redirect there).
+ - The phone number is always in view: in the header on large screens, and in a bar fixed to the bottom of the screen on phones. Every phone number is a tap-to-call link.
+ - A Request Service form. Requests are saved to the Admin inbox and, once email is set up, emailed too (with **EMERGENCY** at the start of the subject when the box is ticked).
+ - Search-engine basics: a title and description for every page, Locksmith structured data, a sitemap, `robots.txt` (keeps `/admin` out of search results) and a sharing picture.
+@@ -105,4 +105,4 @@ See **[DEPLOY.md](DEPLOY.md)** for Namecheap shared hosting (cPanel "Setup Node.
+ 
+ ## Credits
+ 
+-The font is Atkinson Hyperlegible Next by the Braille Institute, under the SIL Open Font License ([`src/fonts/OFL.txt`](src/fonts/OFL.txt)). Icons are from [Lucide](https://lucide.dev).
++The body font is Atkinson Hyperlegible Next by the Braille Institute, under the SIL Open Font License ([`src/fonts/OFL.txt`](src/fonts/OFL.txt)). The public site's titles use Saira Expanded ExtraBold Italic, chosen to match the logo, also under the SIL Open Font License ([`src/fonts/OFL-Saira.txt`](src/fonts/OFL-Saira.txt)). Icons are from [Lucide](https://lucide.dev).
+diff --git a/e2e/admin.spec.ts b/e2e/admin.spec.ts
+index f39fe0f..067b335 100644
+--- a/e2e/admin.spec.ts
++++ b/e2e/admin.spec.ts
+@@ -62,7 +62,7 @@ test.describe("Admin panel", () => {
+     await page.getByRole("button", { name: "Use the original Key Express logo again" }).click();
+     await expect(page.getByText("Default logo restored ✓")).toBeVisible();
+     await page.goto("/");
+-    await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.svg");
++    await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.png");
+   });
+ 
+   test("a new Service can be added, hidden from the website, and deleted", async ({ page }) => {
+@@ -74,14 +74,15 @@ test.describe("Admin panel", () => {
+     await page.getByRole("button", { name: "Add this service" }).click();
+     await expect(page.getByText("New service added ✓")).toBeVisible();
+ 
+-    await page.goto("/services");
+-    await expect(page.locator("#safe-opening h2")).toHaveText("Safe Opening");
++    const cards = page.locator("#services li h3");
++    await page.goto("/");
++    await expect(cards.filter({ hasText: "Safe Opening" })).toHaveCount(1);
+ 
+     await page.goto("/admin/services");
+     await page.getByRole("button", { name: /Hide.*Safe Opening/ }).click();
+     await expect(page.getByText("Now hidden from the website ✓")).toBeVisible();
+-    await page.goto("/services");
+-    await expect(page.locator("#safe-opening")).toHaveCount(0);
++    await page.goto("/");
++    await expect(cards.filter({ hasText: "Safe Opening" })).toHaveCount(0);
+ 
+     await page.goto("/admin/services");
+     await page.getByRole("button", { name: /Delete.*Safe Opening/ }).click();
+@@ -104,9 +105,8 @@ test.describe("Admin panel", () => {
+     await expect(page.getByText("Saved ✓")).toBeVisible();
+ 
+     try {
+-      await page.goto("/services");
+-      await expect(page.locator("#smart-keys h2")).toHaveText("Smart Keys & Push-to-Start");
+-      await page.goto("/faq");
++      await page.goto("/");
++      await expect(page.locator("#services li h3").filter({ hasText: "Smart Keys & Push-to-Start" })).toHaveCount(1);
+       await page.getByText("How quickly can you get to me?").click();
+       const answer = page.locator("details[open]");
+       await expect(answer.getByText("Usually within 20–40 minutes.")).toBeVisible();
+@@ -129,32 +129,6 @@ test.describe("Admin panel", () => {
+     }
+   });
+ 
+-  test("a Service photo is shown on the Services page, resized for the screen", async ({ page }, testInfo) => {
+-    const photo = testInfo.outputPath("van.jpg");
+-    await sharp({ create: { width: 1600, height: 1200, channels: 3, background: "#1e56c7" } }).jpeg().toFile(photo);
+-    await logIn(page);
+-    await page.goto("/admin/services");
+-    await page.getByRole("link", { name: /Edit.*Residential/ }).click();
+-    await page.getByLabel("Choose a picture").setInputFiles(photo);
+-    await page.getByRole("button", { name: "Save changes" }).click();
+-    await expect(page.getByText("Saved ✓")).toBeVisible();
+-
+-    await page.setViewportSize({ width: 390, height: 844 });
+-    await page.goto("/services#residential");
+-    const image = page.locator("#residential img");
+-    await expect(image).toHaveAttribute("alt", "Residential");
+-    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.currentSrc)).toContain("/_next/image?url=%2Fuploads%2Fservice-");
+-
+-    await page.setViewportSize({ width: 1280, height: 720 });
+-    await page.goto("/admin/services");
+-    await page.getByRole("link", { name: /Edit.*Residential/ }).click();
+-    await page.getByLabel("Remove this picture").check();
+-    await page.getByRole("button", { name: "Save changes" }).click();
+-    await expect(page.getByText("Saved ✓")).toBeVisible();
+-    await page.goto("/services");
+-    await expect(page.locator("#residential img")).toHaveCount(0);
+-  });
+-
+   test("with the home page's form hidden, Request Service opens the Contact page's form", async ({ page }) => {
+     await logIn(page);
+     await page.goto("/admin/content");
+@@ -180,6 +154,31 @@ test.describe("Admin panel", () => {
+     }
+   });
+ 
++  test("with the home page's questions hidden, FAQ goes from the menu and the footer", async ({ page }) => {
++    await logIn(page);
++    await page.goto("/admin/content");
++    const faq = page.locator("details", { hasText: "Questions and answers" });
++    await faq.locator("summary").click();
++    await faq.getByLabel("Show this section on the home page").uncheck();
++    await faq.getByRole("button", { name: "Save changes" }).click();
++    await expect(faq.getByText("Saved ✓")).toBeVisible();
++
++    try {
++      await page.goto("/about");
++      await expect(page.locator("#faq")).toHaveCount(0);
++      await expect(page.locator("header").getByRole("link", { name: "FAQ" })).toHaveCount(0);
++      await expect(page.locator("footer").getByRole("link", { name: "FAQ" })).toHaveCount(0);
++      await expect(page.locator("header").getByRole("link", { name: "Services" })).toHaveCount(1);
++    } finally {
++      await page.goto("/admin/content");
++      const again = page.locator("details", { hasText: "Questions and answers" });
++      await again.locator("summary").click();
++      await again.getByLabel("Show this section on the home page").check();
++      await again.getByRole("button", { name: "Save changes" }).click();
++      await expect(again.getByText("Saved ✓")).toBeVisible();
++    }
++  });
++
+   test("Services can be put in a new order", async ({ page }) => {
+     await logIn(page);
+     await page.goto("/admin/services");
+@@ -203,14 +202,14 @@ test.describe("Admin panel", () => {
+     await page.getByLabel("Answer", { exact: true }).fill("No. We tell you the price before we start.");
+     await page.getByRole("button", { name: "Add this question" }).click();
+     await expect(page.getByText("New question added ✓")).toBeVisible();
+-    await page.goto("/faq");
++    await page.goto("/");
+     await expect(page.getByText("Do you charge for estimates?")).toBeVisible();
+ 
+     await page.goto("/admin/faq");
+     await page.getByRole("button", { name: /Delete.*Do you charge for estimates/ }).click();
+     await page.getByRole("button", { name: "Yes, delete it" }).click();
+     await expect(page.getByText("Question deleted ✓")).toBeVisible();
+-    await page.goto("/faq");
++    await page.goto("/");
+     await expect(page.getByText("Do you charge for estimates?")).toHaveCount(0);
+   });
+ 
+diff --git a/e2e/public-site.spec.ts b/e2e/public-site.spec.ts
+index 8d5a1e1..5053b83 100644
+--- a/e2e/public-site.spec.ts
++++ b/e2e/public-site.spec.ts
+@@ -1,6 +1,6 @@
+ import { expect, test } from "@playwright/test";
+ 
+-const pages = ["/", "/services", "/about", "/faq", "/contact", "/privacy-policy"];
++const pages = ["/", "/about", "/contact", "/privacy-policy"];
+ 
+ test.describe("the public website", () => {
+   for (const path of pages) {
+@@ -25,25 +25,24 @@ test.describe("the public website", () => {
+     }
+   });
+ 
+-  test("the big phone number is in the header at every desktop width", async ({ page }) => {
++  test("the phone number is in the header's Call button at every desktop width", async ({ page }) => {
+     for (const width of [1024, 1280]) {
+       await page.setViewportSize({ width, height: 900 });
+       await page.goto("/");
+-      await expect(page.locator("header").getByRole("link", { name: "(555) 014-7823", exact: true }).filter({ visible: true })).toHaveCount(1);
+-      await expect(page.locator("header").getByRole("link", { name: /Call Now/ })).toBeInViewport();
++      await expect(page.locator("header").getByRole("link", { name: "Call (555) 014-7823", exact: true })).toBeInViewport();
+     }
+   });
+ 
+   test("the sticky call bar is on phones and goes away on large screens", async ({ page }) => {
+     await page.setViewportSize({ width: 390, height: 844 });
+-    await page.goto("/services");
++    await page.goto("/about");
+     const bar = page.locator("div.fixed").filter({ has: page.getByRole("link", { name: /Call Now/ }) });
+     await expect(bar).toBeVisible();
+     await expect(bar.getByRole("link", { name: "Request Service" })).toHaveAttribute("href", "/contact#request");
+ 
+     await page.setViewportSize({ width: 1280, height: 900 });
+     await expect(bar).toBeHidden();
+-    await expect(page.locator("header").getByRole("link", { name: /Call Now/ })).toBeVisible();
++    await expect(page.locator("header").getByRole("link", { name: "Call (555) 014-7823", exact: true })).toBeVisible();
+   });
+ 
+   test("the keyboard reaches the skip link first, and it jumps to the content", async ({ page }) => {
+@@ -70,8 +69,63 @@ test.describe("the public website", () => {
+     await expect(menuButton).toBeFocused();
+   });
+ 
+-  test("the FAQ answers open like accordions", async ({ page }) => {
++  test("Services and FAQ in the menu scroll to their home page sections", async ({ page }) => {
++    await page.setViewportSize({ width: 1280, height: 800 });
++    const menu = page.locator("header").getByRole("navigation", { name: "Main" });
++    await page.goto("/about");
++    await menu.getByRole("link", { name: "Services" }).click();
++    await expect(page).toHaveURL(/\/#services$/);
++    await expect(page.locator("#services-heading")).toBeInViewport();
++
++    await menu.getByRole("link", { name: "FAQ" }).click();
++    await expect(page).toHaveURL(/\/#faq$/);
++    await expect(page.locator("#faq-heading")).toBeInViewport();
++    await expect(menu.getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
++
++    // A second click, with the address already /#faq, still scrolls back down.
++    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
++    await menu.getByRole("link", { name: "FAQ" }).click();
++    await expect(page.locator("#faq-heading")).toBeInViewport();
++  });
++
++  test("coming back to the home page, by link or the Back button, starts at the top", async ({ page }) => {
++    await page.setViewportSize({ width: 1280, height: 800 });
++    const menu = page.locator("header").getByRole("navigation", { name: "Main" });
++    await page.goto("/");
++    await menu.getByRole("link", { name: "Services" }).click();
++    await expect(page.locator("#services-heading")).toBeInViewport();
++
++    await menu.getByRole("link", { name: "About" }).click();
++    await expect(page).toHaveURL(/\/about$/);
++    await page.goBack();
++    await expect(page.locator("#hero-heading")).toBeInViewport();
++    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
++
++    await menu.getByRole("link", { name: "About" }).click();
++    await menu.getByRole("link", { name: "Home" }).click();
++    await expect(page).toHaveURL(/\/$/);
++    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
++  });
++
++  test("the phone menu closes after a tap on a link to a home page section", async ({ page }) => {
++    await page.setViewportSize({ width: 390, height: 844 });
++    await page.goto("/");
++    await page.getByRole("button", { name: "Menu" }).click();
++    await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "FAQ" }).click();
++
++    await expect(page.getByRole("button", { name: "Menu" })).toHaveAttribute("aria-expanded", "false");
++    await expect(page.locator("#faq-heading")).toBeInViewport();
++  });
++
++  test("the old Services and FAQ addresses go to the home page sections", async ({ page }) => {
++    await page.goto("/services");
++    await expect(page).toHaveURL(/\/#services$/);
+     await page.goto("/faq");
++    await expect(page).toHaveURL(/\/#faq$/);
++  });
++
++  test("the FAQ answers open like accordions", async ({ page }) => {
++    await page.goto("/");
+     const question = page.getByText("Do you really work 24 hours a day?");
+     const answer = page.getByText("Emergency lockout help is available 24 hours a day");
+     await expect(answer).toBeHidden();
+@@ -95,7 +149,9 @@ test.describe("the public website", () => {
+ 
+     expect(robots).toContain("Disallow: /admin");
+     expect(robots).toContain("Sitemap: http://127.0.0.1:3210/sitemap.xml");
+-    expect(sitemap).toContain("<loc>http://127.0.0.1:3210/services</loc>");
++    expect(sitemap).toContain("<loc>http://127.0.0.1:3210/about</loc>");
++    expect(sitemap).not.toContain("/services");
++    expect(sitemap).not.toContain("/faq");
+   });
+ 
+   test("the home page describes the business to search engines as a Locksmith", async ({ page }) => {
+diff --git a/next.config.ts b/next.config.ts
+index 7d8cd91..8d1efd2 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
+   // This folder is the project, even when a parent folder has its own lockfile.
+   outputFileTracingRoot: path.resolve(import.meta.dirname),
+   poweredByHeader: false,
++  // Services and Questions used to be pages of their own; they are now sections of the home page.
++  async redirects() {
++    return [
++      { source: "/services", destination: "/#services", permanent: false },
++      { source: "/faq", destination: "/#faq", permanent: false },
++    ];
++  },
+   images: {
+     // Only uploaded photos go through the image resizer, and never with a query string.
+     localPatterns: [{ pathname: "/uploads/**", search: "" }],
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index c82eab1..527ed35 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -43,7 +43,7 @@ model PageSection {
+ 
+ model Service {
+   id               Int     @id @default(autoincrement())
+-  // Used as the link on the Services page, e.g. /services#smart-keys.
++  // A fixed name for the service, e.g. smart-keys. It doesn't change when the title does.
+   slug             String  @unique
+   title            String
+   shortDescription String
+@@ -72,7 +72,7 @@ model PrivacyPolicy {
+ }
+ 
+ model PageSeo {
+-  // The page path, e.g. "/" or "/services".
++  // The page path, e.g. "/" or "/about".
+   path        String  @id
+   title       String
+   description String
+diff --git a/public/logo.svg b/public/logo.svg
+deleted file mode 100644
+index 4475712..0000000
+--- a/public/logo.svg
++++ /dev/null
+@@ -1,14 +0,0 @@
+-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 327 64" width="327" height="64" role="img" aria-labelledby="t">
+-  <title id="t">Key Express</title>
+-  <defs>
+-    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e56c7"/><stop offset="1" stop-color="#0b2545"/></linearGradient>
+-    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c5ccd6"/></linearGradient>
+-  </defs>
+-  <rect width="64" height="64" rx="16" fill="url(#tile)"/>
+-  <g fill="none" stroke="url(#metal)" stroke-linecap="round" stroke-linejoin="round">
+-    <circle cx="22" cy="22" r="9" stroke-width="6"/>
+-    <path d="M28.5 28.5 49 49" stroke-width="6"/>
+-    <path d="M41 41l5-5M46 46l4-4" stroke-width="5"/>
+-  </g>
+-  <path fill="#0b2545" d="M85.62 44.50L79.84 44.50L79.84 21.79L85.62 21.79L85.62 30.36L93.44 21.79L100.47 21.79L91.43 31.58L100.81 44.50L94.15 44.50L87.72 35.56L85.62 37.87L85.62 44.50ZM122.34 44.50L104.49 44.50L104.49 21.79L122.20 21.79L122.20 26.89L110.27 26.89L110.27 30.29L117.34 30.29L117.34 35.35L110.27 35.35L110.27 39.40L122.34 39.40L122.34 44.50ZM139.51 44.50L133.73 44.50L133.73 35.59L125.00 21.79L131.76 21.79L136.59 30.12L141.45 21.79L148.25 21.79L139.51 35.59L139.51 44.50ZM182.16 44.50L164.31 44.50L164.31 21.79L182.02 21.79L182.02 26.89L170.09 26.89L170.09 30.29L177.16 30.29L177.16 35.35L170.09 35.35L170.09 39.40L182.16 39.40L182.16 44.50ZM192.09 44.50L185.15 44.50L193.48 32.84L185.63 21.79L192.53 21.79L196.92 27.98L201.34 21.79L208.24 21.79L200.39 32.84L208.72 44.50L201.78 44.50L196.92 37.67L192.09 44.50ZM218.17 44.50L212.39 44.50L212.39 21.79L222.83 21.79Q225.28 21.79 227.35 22.57Q229.43 23.35 230.68 25.02Q231.94 26.68 231.94 29.34L231.94 29.34Q231.94 31.99 230.68 33.67Q229.43 35.35 227.35 36.14Q225.28 36.92 222.83 36.92L222.83 36.92L218.17 36.92L218.17 44.50ZM218.17 26.68L218.17 32.02L222.73 32.02Q224.02 32.02 224.94 31.39Q225.86 30.76 225.86 29.34L225.86 29.34Q225.86 27.94 224.94 27.31Q224.02 26.68 222.73 26.68L222.73 26.68L218.17 26.68ZM241.67 44.50L235.89 44.50L235.89 21.79L246.63 21.79Q248.98 21.79 250.97 22.52Q252.96 23.25 254.16 24.83Q255.37 26.41 255.37 28.96L255.37 28.96Q255.37 31.75 253.91 33.38Q252.45 35.01 250.17 35.66L250.17 35.66L250.17 35.66L256.53 44.50L249.80 44.50L243.98 36.17L241.67 36.17L241.67 44.50ZM241.67 26.68L241.67 31.27L246.29 31.27Q247.18 31.27 247.84 31.04Q248.50 30.80 248.90 30.29Q249.29 29.78 249.29 28.96L249.29 28.96Q249.29 28.15 248.90 27.64Q248.50 27.13 247.84 26.90Q247.18 26.68 246.29 26.68L246.29 26.68L241.67 26.68ZM277.95 44.50L260.10 44.50L260.10 21.79L277.82 21.79L277.82 26.89L265.88 26.89L265.88 30.29L272.95 30.29L272.95 35.35L265.88 35.35L265.88 39.40L277.95 39.40L277.95 44.50ZM291.28 44.91L291.28 44.91Q288.70 44.91 286.69 44.21Q284.69 43.51 283.33 42.20Q281.97 40.90 281.25 39.09L281.25 39.09L286.52 37.19Q286.76 38.11 287.43 38.80Q288.09 39.50 289.11 39.89Q290.13 40.28 291.42 40.28L291.42 40.28Q292.37 40.28 293.22 40.08Q294.07 39.88 294.62 39.38Q295.16 38.89 295.16 38.01L295.16 38.01Q295.16 36.92 294.24 36.39Q293.32 35.86 291.42 35.52L291.42 35.52L288.73 35.01Q286.66 34.61 285.10 33.79Q283.53 32.97 282.67 31.66Q281.80 30.36 281.80 28.55L281.80 28.55Q281.80 26.65 282.67 25.31Q283.53 23.96 284.96 23.08Q286.39 22.20 288.12 21.79Q289.86 21.38 291.56 21.38L291.56 21.38Q293.43 21.38 295.18 21.89Q296.93 22.40 298.31 23.52Q299.68 24.64 300.40 26.45L300.40 26.45L295.19 28.35Q294.92 27.60 294.34 27.07Q293.77 26.55 292.93 26.28Q292.10 26.00 291.01 26.00L291.01 26.00Q289.96 26.00 289.18 26.24Q288.39 26.48 287.99 26.92Q287.58 27.36 287.58 28.01L287.58 28.01Q287.58 28.76 288.17 29.28Q288.77 29.81 290.03 30.05L290.03 30.05L293.05 30.66Q295.57 31.17 297.34 31.95Q299.10 32.74 300.02 33.99Q300.94 35.25 300.94 37.26L300.94 37.26Q300.94 39.71 299.58 41.42Q298.22 43.14 296.03 44.02Q293.83 44.91 291.28 44.91ZM313.80 44.91L313.80 44.91Q311.21 44.91 309.21 44.21Q307.20 43.51 305.84 42.20Q304.48 40.90 303.77 39.09L303.77 39.09L309.04 37.19Q309.27 38.11 309.94 38.80Q310.60 39.50 311.62 39.89Q312.64 40.28 313.93 40.28L313.93 40.28Q314.88 40.28 315.73 40.08Q316.58 39.88 317.13 39.38Q317.67 38.89 317.67 38.01L317.67 38.01Q317.67 36.92 316.75 36.39Q315.84 35.86 313.93 35.52L313.93 35.52L311.25 35.01Q309.17 34.61 307.61 33.79Q306.04 32.97 305.18 31.66Q304.31 30.36 304.31 28.55L304.31 28.55Q304.31 26.65 305.18 25.31Q306.04 23.96 307.47 23.08Q308.90 22.20 310.63 21.79Q312.37 21.38 314.07 21.38L314.07 21.38Q315.94 21.38 317.69 21.89Q319.44 22.40 320.82 23.52Q322.19 24.64 322.91 26.45L322.91 26.45L317.71 28.35Q317.43 27.60 316.86 27.07Q316.28 26.55 315.44 26.28Q314.61 26.00 313.52 26.00L313.52 26.00Q312.47 26.00 311.69 26.24Q310.91 26.48 310.50 26.92Q310.09 27.36 310.09 28.01L310.09 28.01Q310.09 28.76 310.69 29.28Q311.28 29.81 312.54 30.05L312.54 30.05L315.56 30.66Q318.08 31.17 319.85 31.95Q321.62 32.74 322.53 33.99Q323.45 35.25 323.45 37.26L323.45 37.26Q323.45 39.71 322.09 41.42Q320.73 43.14 318.54 44.02Q316.35 44.91 313.80 44.91Z"/>
+-</svg>
+diff --git a/scripts/check-contrast.mjs b/scripts/check-contrast.mjs
+index c019d49..75d6af9 100644
+--- a/scripts/check-contrast.mjs
++++ b/scripts/check-contrast.mjs
+@@ -1,15 +1,19 @@
+ // Checks every text/background color pair the site uses against WCAG AA:
+ // 4.5:1 for text, 3:1 for borders and focus outlines. Run: npm run check:contrast
+ const colors = {
+-  navy: "#0b2545",
+-  action: "#1e56c7",
+-  actionHover: "#16439e",
+-  silver: "#c5ccd6",
+-  silverSoft: "#e9edf2",
+-  silverLight: "#f3f5f8",
++  // Color Hunt palette 14279B · 3D56B2 · 5C7AEA · E6E6E6, plus shades of it
++  royal: "#14279b",
++  action: "#3d56b2",
++  periwinkle: "#5c7aea",
++  silverLight: "#e6e6e6",
++  navy: "#0b1650",
++  navyDeep: "#081040",
++  sky: "#9fb1f5",
++  silver: "#d3d7e6",
++  silverSoft: "#edeff7",
+   white: "#ffffff",
+-  ink: "#1a202c",
+-  inkSoft: "#3b4556",
++  ink: "#1b1f3b",
++  inkSoft: "#4a5070",
+   emergency: "#c62828",
+   success: "#1e6b3a",
+   error: "#b3261e",
+@@ -19,29 +23,33 @@ const colors = {
+ // [foreground, background, what it is, minimum ratio]
+ const pairs = [
+   ["ink", "white", "body text", 4.5],
+-  ["ink", "silverLight", "body text on light silver sections", 4.5],
+-  ["ink", "silver", "body text on the bottom of the brushed-silver gradient", 4.5],
++  ["ink", "silverLight", "body text on the grey sections", 4.5],
+   ["inkSoft", "white", "hints and secondary text", 4.5],
+-  ["inkSoft", "silverLight", "hints on light silver", 4.5],
+-  ["navy", "white", "headings", 4.5],
+-  ["navy", "silverLight", "headings on light silver", 4.5],
+-  ["navy", "silver", "headings on the brushed-silver gradient", 4.5],
+-  ["white", "navy", "header bar, footer and dark sections", 4.5],
+-  ["silverSoft", "navy", "secondary text on dark blue", 4.5],
+-  ["white", "action", "blue buttons", 4.5],
+-  ["white", "actionHover", "blue buttons on hover", 4.5],
++  ["inkSoft", "silverLight", "hints on the grey sections", 4.5],
++  ["royal", "white", "headings", 4.5],
++  ["royal", "silverLight", "headings on the grey sections", 4.5],
++  ["white", "navy", "header, footer and dark bands", 4.5],
++  ["white", "royal", "white text where the top-section gradient reaches royal", 4.5],
++  ["white", "navyDeep", "top bar and footer", 4.5],
++  ["silverSoft", "navy", "secondary text on navy", 4.5],
++  ["sky", "navy", "phone icons, hovers and the current menu item on navy", 4.5],
++  ["sky", "royal", "phone icons where the gradient reaches royal", 4.5],
++  ["sky", "navyDeep", "phone icons in the footer", 4.5],
++  ["white", "action", "blue buttons and the light end of the call gradient", 4.5],
++  ["white", "royal", "the dark end of the call gradient, and button hovers", 4.5],
++  ["royal", "white", "white call buttons on navy", 4.5],
++  ["royal", "silverSoft", "white call buttons on hover", 4.5],
+   ["action", "white", "links and outline buttons", 4.5],
+-  ["action", "silverLight", "links on light silver", 4.5],
+-  ["actionHover", "silver", "links on the brushed-silver gradient (globals.css)", 4.5],
+-  ["actionHover", "white", "links on hover", 4.5],
+-  ["navy", "silverSoft", "white-button hover on dark blue", 4.5],
++  ["action", "silverLight", "links on the grey sections", 4.5],
++  ["royal", "white", "links on hover", 4.5],
++  ["periwinkle", "white", "card accent lines and icons (graphics need 3:1)", 3],
+   ["white", "emergency", "24/7 Emergency badge", 4.5],
+   ["success", "white", "Saved ✓ messages", 4.5],
+   ["success", "silverLight", "Shown status chips", 4.5],
+   ["error", "white", "error messages", 4.5],
+   ["error", "silverLight", "Hidden status chips", 4.5],
+   ["ink", "emergencyRow", "emergency requests in the inbox", 4.5],
+-  ["action", "emergencyRow", "links in emergency requests", 4.5],
++  ["royal", "emergencyRow", "links in the inbox, including emergency requests (inbox.tsx)", 4.5],
+   ["inkSoft", "white", "input borders", 3],
+   ["action", "white", "focus outline on light backgrounds", 3],
+   ["white", "navy", "focus outline on dark backgrounds", 3],
+diff --git a/src/app/(site)/contact/page.tsx b/src/app/(site)/contact/page.tsx
+index 210dda9..2ff1f0b 100644
+--- a/src/app/(site)/contact/page.tsx
++++ b/src/app/(site)/contact/page.tsx
+@@ -27,7 +27,7 @@ export default async function ContactPage() {
+       <LocalBusinessJsonLd settings={settings} services={services} />
+       <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
+         <p>
+-          <FilledText text={intro.text} placeholders={placeholders} />
++          <FilledText text={intro.text} placeholders={placeholders} tone="dark" />
+         </p>
+       </PageHeader>
+       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-12 sm:px-6 md:py-16 lg:grid-cols-[1fr_1.4fr]">
+@@ -37,7 +37,7 @@ export default async function ContactPage() {
+           </h2>
+           <div>
+             <p className="font-bold text-navy">Phone, any time</p>
+-            <PhoneNumberLink phone={settings.phone} className="mt-1 text-3xl text-navy hover:text-action md:text-4xl" />
++            <PhoneNumberLink phone={settings.phone} className="mt-1 text-3xl md:text-4xl" />
+           </div>
+           <p className="flex items-start gap-3">
+             <Mail aria-hidden="true" className="mt-1 size-6 shrink-0 text-action" />
+diff --git a/src/app/(site)/faq/page.tsx b/src/app/(site)/faq/page.tsx
+deleted file mode 100644
+index 3f22206..0000000
+--- a/src/app/(site)/faq/page.tsx
++++ /dev/null
+@@ -1,43 +0,0 @@
+-import { FaqList } from "@/components/site/blocks";
+-import { CallButton } from "@/components/site/buttons";
+-import { FilledText } from "@/components/site/filled-text";
+-import { PageHeader } from "@/components/site/site-chrome";
+-import { fillPlaceholders } from "@/lib/placeholders";
+-import { pageMetadata } from "@/server/page-metadata";
+-import { getPlaceholderValues, getSections, getSettings, getVisibleFaqs } from "@/server/site-data";
+-
+-export function generateMetadata() {
+-  return pageMetadata("/faq");
+-}
+-
+-export default async function FaqPage() {
+-  const [settings, sections, faqs, placeholders] = await Promise.all([
+-    getSettings(),
+-    getSections(),
+-    getVisibleFaqs(),
+-    getPlaceholderValues(),
+-  ]);
+-  const intro = sections["faq.intro"].content;
+-
+-  return (
+-    <>
+-      <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
+-        <p>
+-          <FilledText text={intro.text} placeholders={placeholders} />
+-        </p>
+-      </PageHeader>
+-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16">
+-        <FaqList faqs={faqs} placeholders={placeholders} />
+-        <div className="mt-12 rounded-2xl bg-silver-light p-6 text-center">
+-          <p className="text-xl font-bold text-navy">{fillPlaceholders(intro.closingHeading, placeholders)}</p>
+-          <p className="mt-2">
+-            <FilledText text={intro.closingText} placeholders={placeholders} />
+-          </p>
+-          <div className="mt-5">
+-            <CallButton phone={settings.phone} />
+-          </div>
+-        </div>
+-      </div>
+-    </>
+-  );
+-}
+diff --git a/src/app/(site)/page.tsx b/src/app/(site)/page.tsx
+index acde22b..a277108 100644
+--- a/src/app/(site)/page.tsx
++++ b/src/app/(site)/page.tsx
+@@ -2,10 +2,11 @@ import { Building2, ClipboardList, MapPin, Siren, Smartphone } from "lucide-reac
+ import { ButtonLink, CallButton, PhoneNumberLink } from "@/components/site/buttons";
+ import { FilledText, Paragraphs } from "@/components/site/filled-text";
+ import { FaqList, ServiceCard, WhyChooseUsBadges } from "@/components/site/blocks";
+-import { KeyIllustration } from "@/components/site/key-illustration";
++import { LockIllustration } from "@/components/site/lock-illustration";
+ import { LocalBusinessJsonLd } from "@/components/site/local-business-json-ld";
+ import { RequestServiceForm } from "@/components/site/request-form";
+ import { Section, SectionHeading } from "@/components/site/section";
++import { EmergencyServiceBadge } from "@/components/site/site-chrome";
+ import { requestServiceHref } from "@/lib/navigation";
+ import { fillPlaceholders } from "@/lib/placeholders";
+ import { getPlaceholderValues, getSections, getSettings, getVisibleFaqs, getVisibleServices } from "@/server/site-data";
+@@ -42,29 +43,30 @@ export default async function HomePage() {
+     <>
+       <LocalBusinessJsonLd settings={settings} services={services} />
+       {hero.visible ? (
+-        <section aria-labelledby="hero-heading" className="bg-brushed">
++        <section aria-labelledby="hero-heading" className="on-dark bg-night text-white">
+           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1fr_auto]">
+             <div className="max-w-3xl">
++              {settings.emergencyBadge && <EmergencyServiceBadge />}
+               <h1 id="hero-heading" className="text-[2rem] font-extrabold md:text-5xl">
+                 {fill(hero.content.heading)}
+               </h1>
+-              <p className="mt-5 text-xl md:text-[1.375rem]">
+-                <FilledText text={hero.content.text} placeholders={placeholders} />
++              <p className="mt-5 text-xl text-silver-soft md:text-[1.375rem]">
++                <FilledText text={hero.content.text} placeholders={placeholders} tone="dark" />
+               </p>
+               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+-                <CallButton phone={settings.phone} label={fill(hero.content.callButton)} />
+-                <ButtonLink href={requestHref} variant="secondary">
++                <CallButton phone={settings.phone} label={fill(hero.content.callButton)} variant="light" />
++                <ButtonLink href={requestHref} variant="outlineLight">
+                   <ClipboardList aria-hidden="true" className="size-6 shrink-0" />
+                   {fill(hero.content.requestButton)}
+                 </ButtonLink>
+               </div>
+-              <p className="mt-8 text-lg">
++              <p className="mt-8 text-lg text-silver-soft">
+                 {fill(hero.content.phoneIntro)}
+                 <br />
+-                <PhoneNumberLink phone={settings.phone} className="mt-1 text-3xl text-navy hover:text-action-hover md:text-4xl" />
++                <PhoneNumberLink phone={settings.phone} tone="dark" className="mt-1 text-3xl md:text-4xl" />
+               </p>
+             </div>
+-            <KeyIllustration className="hidden size-64 drop-shadow-xl lg:block" />
++            <LockIllustration className="hidden w-80 lg:block" />
+           </div>
+         </section>
+       ) : (
+@@ -75,7 +77,7 @@ export default async function HomePage() {
+         <Section labelledBy="emergency-heading">
+           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+             <div className="flex max-w-3xl gap-5">
+-              <span className="hidden size-16 shrink-0 items-center justify-center rounded-full bg-silver-light text-navy sm:flex">
++              <span className="hidden size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-royal to-action text-white shadow-[0_10px_24px_-10px_rgb(20_39_155/0.6)] sm:flex">
+                 <Siren aria-hidden="true" className="size-9" />
+               </span>
+               <div>
+@@ -94,7 +96,7 @@ export default async function HomePage() {
+         <Section labelledBy="business-heading" tone="silver">
+           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+             <div className="flex max-w-3xl gap-5">
+-              <span className="hidden size-16 shrink-0 items-center justify-center rounded-full bg-white text-navy sm:flex">
++              <span className="hidden size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-royal to-action text-white shadow-[0_10px_24px_-10px_rgb(20_39_155/0.6)] sm:flex">
+                 <Building2 aria-hidden="true" className="size-9" />
+               </span>
+               <div>
+@@ -136,7 +138,7 @@ export default async function HomePage() {
+       )}
+ 
+       {ourServices.visible && services.length > 0 && (
+-        <Section labelledBy="services-heading">
++        <Section id="services" labelledBy="services-heading">
+           <div className="max-w-3xl">
+             <SectionHeading id="services-heading">{fill(ourServices.content.heading)}</SectionHeading>
+             <p className="mt-4">
+@@ -154,11 +156,6 @@ export default async function HomePage() {
+               />
+             ))}
+           </ul>
+-          <p className="mt-10 text-center">
+-            <ButtonLink href="/services" variant="secondary">
+-              {fill(ourServices.content.button)}
+-            </ButtonLink>
+-          </p>
+         </Section>
+       )}
+ 
+@@ -166,7 +163,7 @@ export default async function HomePage() {
+         <Section labelledBy="fob-heading" tone="silver">
+           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+             <div className="flex max-w-3xl gap-5">
+-              <span className="hidden size-16 shrink-0 items-center justify-center rounded-full bg-white text-navy sm:flex">
++              <span className="hidden size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-royal to-action text-white shadow-[0_10px_24px_-10px_rgb(20_39_155/0.6)] sm:flex">
+                 <Smartphone aria-hidden="true" className="size-9" />
+               </span>
+               <div>
+@@ -190,12 +187,7 @@ export default async function HomePage() {
+                 <FilledText text={businessAccounts.content.text} placeholders={placeholders} tone="dark" />
+               </p>
+             </div>
+-            <CallButton
+-              phone={settings.phone}
+-              label={fill(businessAccounts.content.button)}
+-              variant="light"
+-              className="shrink-0"
+-            />
++            <CallButton phone={settings.phone} label={fill(businessAccounts.content.button)} variant="light" className="shrink-0" />
+           </div>
+         </Section>
+       )}
+@@ -218,7 +210,7 @@ export default async function HomePage() {
+       )}
+ 
+       {faq.visible && faqs.length > 0 && (
+-        <Section labelledBy="faq-heading" tone="silver">
++        <Section id="faq" labelledBy="faq-heading" tone="silver">
+           <div className="mx-auto max-w-3xl">
+             <SectionHeading id="faq-heading">{fill(faq.content.heading)}</SectionHeading>
+             <FaqList faqs={faqs} placeholders={placeholders} className="mt-8" />
+@@ -234,7 +226,7 @@ export default async function HomePage() {
+           </p>
+           <ul className="mt-8 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 md:grid-cols-4">
+             {settings.towns.map((town) => (
+-              <li key={town} className="flex items-center gap-3 rounded-xl bg-silver-light px-4 py-3 font-bold text-navy">
++              <li key={town} className="flex items-center gap-3 rounded-xl border border-silver bg-silver-light px-4 py-3 font-bold text-navy">
+                 <MapPin aria-hidden="true" className="size-6 shrink-0 text-action" />
+                 {town}
+               </li>
+diff --git a/src/app/(site)/services/page.tsx b/src/app/(site)/services/page.tsx
+deleted file mode 100644
+index 7f0d78d..0000000
+--- a/src/app/(site)/services/page.tsx
++++ /dev/null
+@@ -1,99 +0,0 @@
+-import { ClipboardList } from "lucide-react";
+-import Image from "next/image";
+-import { ButtonLink, CallButton } from "@/components/site/buttons";
+-import { FilledText, Paragraphs } from "@/components/site/filled-text";
+-import { PageHeader } from "@/components/site/site-chrome";
+-import { NamedIcon } from "@/lib/icons";
+-import { fillPlaceholders } from "@/lib/placeholders";
+-import { pageMetadata } from "@/server/page-metadata";
+-import { getPlaceholderValues, getSections, getSettings, getVisibleServices } from "@/server/site-data";
+-
+-export function generateMetadata() {
+-  return pageMetadata("/services");
+-}
+-
+-export default async function ServicesPage() {
+-  const [settings, sections, services, placeholders] = await Promise.all([
+-    getSettings(),
+-    getSections(),
+-    getVisibleServices(),
+-    getPlaceholderValues(),
+-  ]);
+-  const intro = sections["services.intro"].content;
+-
+-  return (
+-    <>
+-      <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
+-        <p>
+-          <FilledText text={intro.text} placeholders={placeholders} />
+-        </p>
+-      </PageHeader>
+-
+-      {services.length > 1 && (
+-        <nav aria-labelledby="service-list-heading" className="border-b-2 border-silver bg-white">
+-          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+-            <h2 id="service-list-heading" className="text-xl">
+-              {fillPlaceholders(intro.jumpHeading, placeholders)}
+-            </h2>
+-            <ul className="mt-4 grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+-              {services.map((service) => (
+-                <li key={service.id}>
+-                  <a
+-                    href={`#${service.slug}`}
+-                    className="inline-flex min-h-11 items-center font-bold text-action underline hover:text-action-hover"
+-                  >
+-                    {service.title}
+-                  </a>
+-                </li>
+-              ))}
+-            </ul>
+-          </div>
+-        </nav>
+-      )}
+-
+-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+-        {services.map((service, index) => (
+-          <article
+-            key={service.id}
+-            id={service.slug}
+-            aria-labelledby={`${service.slug}-heading`}
+-            className="grid scroll-mt-4 gap-8 border-b-2 border-silver-soft py-12 last:border-b-0 md:grid-cols-[1fr_auto] md:py-16"
+-          >
+-            <div className="max-w-3xl">
+-              <div className="flex items-center gap-4">
+-                <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-silver-light text-action">
+-                  <NamedIcon name={service.icon} aria-hidden="true" className="size-9" />
+-                </span>
+-                <h2 id={`${service.slug}-heading`} className="text-[1.75rem] md:text-4xl">
+-                  {service.title}
+-                </h2>
+-              </div>
+-              <Paragraphs text={service.longDescription} placeholders={placeholders} className="mt-4" />
+-              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+-                <CallButton phone={settings.phone} label="Call for this service" />
+-                <ButtonLink href="/contact#request" variant="secondary">
+-                  <ClipboardList aria-hidden="true" className="size-6 shrink-0" />
+-                  Request Service
+-                </ButtonLink>
+-              </div>
+-            </div>
+-            {service.imageUrl && (
+-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border-2 border-silver md:w-80">
+-                <Image
+-                  src={service.imageUrl}
+-                  alt={service.title}
+-                  fill
+-                  sizes="(min-width: 768px) 320px, 100vw"
+-                  loading={index < 2 ? "eager" : "lazy"}
+-                  // Photos are resized for each screen; SVG drawings are shown as they are.
+-                  unoptimized={service.imageUrl.endsWith(".svg")}
+-                  className="object-cover"
+-                />
+-              </div>
+-            )}
+-          </article>
+-        ))}
+-      </div>
+-    </>
+-  );
+-}
+diff --git a/src/app/admin/(panel)/faq/page.tsx b/src/app/admin/(panel)/faq/page.tsx
+index 2cba77c..313d1dc 100644
+--- a/src/app/admin/(panel)/faq/page.tsx
++++ b/src/app/admin/(panel)/faq/page.tsx
+@@ -17,7 +17,7 @@ export default async function FaqAdminPage() {
+   return (
+     <>
+       <AdminPageTitle title="Questions (FAQ)">
+-        <p>The questions and answers on the home page and the FAQ page, in this order.</p>
++        <p>The questions and answers on the home page, in this order.</p>
+       </AdminPageTitle>
+       <ButtonLink href="/admin/faq/new" className="mb-8">
+         <Plus aria-hidden="true" className="size-6" />
+diff --git a/src/app/admin/(panel)/requests/inbox.tsx b/src/app/admin/(panel)/requests/inbox.tsx
+index ca28c98..0115bf4 100644
+--- a/src/app/admin/(panel)/requests/inbox.tsx
++++ b/src/app/admin/(panel)/requests/inbox.tsx
+@@ -132,7 +132,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
+                     <PhoneLink phone={request.phone} />
+                     {request.email && (
+                       <p className="break-all">
+-                        <a href={`mailto:${request.email}`} className="text-action underline">
++                        <a href={`mailto:${request.email}`} className="text-action-hover underline">
+                           {request.email}
+                         </a>
+                       </p>
+@@ -180,7 +180,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
+                     <div>
+                       <dt className="font-bold text-navy">Email</dt>
+                       <dd className="break-all">
+-                        <a href={`mailto:${request.email}`} className="text-action underline">
++                        <a href={`mailto:${request.email}`} className="text-action-hover underline">
+                           {request.email}
+                         </a>
+                       </dd>
+@@ -240,7 +240,7 @@ function EmergencyFlag() {
+ 
+ function PhoneLink({ phone }: { phone: string }) {
+   return (
+-    <a href={telHref(phone)} className="inline-flex items-center gap-2 font-bold whitespace-nowrap text-action underline">
++    <a href={telHref(phone)} className="inline-flex items-center gap-2 font-bold whitespace-nowrap text-action-hover underline">
+       <Phone aria-hidden="true" className="size-5" />
+       {phone}
+     </a>
+diff --git a/src/app/admin/(panel)/services/[id]/page.tsx b/src/app/admin/(panel)/services/[id]/page.tsx
+index 6fbee0c..c57922d 100644
+--- a/src/app/admin/(panel)/services/[id]/page.tsx
++++ b/src/app/admin/(panel)/services/[id]/page.tsx
+@@ -21,11 +21,7 @@ export default async function EditServicePage({ params, searchParams }: PageProp
+   return (
+     <>
+       <BackLink href="/admin/services" label="Back to all services" />
+-      <AdminPageTitle title={`Edit: ${service.title}`}>
+-        <p>
+-          On the website at <strong>/services#{service.slug}</strong>
+-        </p>
+-      </AdminPageTitle>
++      <AdminPageTitle title={`Edit: ${service.title}`} />
+       {justAdded && (
+         <p role="status" className="mb-6 flex items-center gap-2 rounded-xl border-2 border-success bg-white p-4 text-xl font-bold text-success">
+           <CircleCheck aria-hidden="true" className="size-7" />
+diff --git a/src/app/admin/(panel)/services/actions.ts b/src/app/admin/(panel)/services/actions.ts
+index e328db7..e8e7220 100644
+--- a/src/app/admin/(panel)/services/actions.ts
++++ b/src/app/admin/(panel)/services/actions.ts
+@@ -45,7 +45,7 @@ export async function saveService(id: number | null, _previous: ActionResult, fo
+       data: {
+         ...parsed.data,
+         imagePath: imagePath ?? null,
+-        // The link on the Services page; it stays the same if the title changes later.
++        // The service's fixed name in links; it stays the same if the title changes later.
+         slug: uniqueSlug(parsed.data.title, new Set(existing.map((service) => service.slug))),
+         sortOrder: nextSortOrder(highest._max.sortOrder),
+       },
+diff --git a/src/app/admin/(panel)/services/page.tsx b/src/app/admin/(panel)/services/page.tsx
+index 9822382..b3603ad 100644
+--- a/src/app/admin/(panel)/services/page.tsx
++++ b/src/app/admin/(panel)/services/page.tsx
+@@ -17,7 +17,7 @@ export default async function ServicesAdminPage() {
+   return (
+     <>
+       <AdminPageTitle title="Services">
+-        <p>The services shown on the home page and the Services page, in this order.</p>
++        <p>The services shown on the home page, in this order.</p>
+       </AdminPageTitle>
+       <ButtonLink href="/admin/services/new" className="mb-8">
+         <Plus aria-hidden="true" className="size-6" />
+diff --git a/src/app/admin/(panel)/services/service-form.tsx b/src/app/admin/(panel)/services/service-form.tsx
+index 99d582e..f708419 100644
+--- a/src/app/admin/(panel)/services/service-form.tsx
++++ b/src/app/admin/(panel)/services/service-form.tsx
+@@ -41,7 +41,7 @@ export function ServiceForm({
+       <TextField
+         name="longDescription"
+         label="Longer description"
+-        hint="Shown on the Services page. Leave an empty line between paragraphs."
++        hint="Saved for later: the website doesn't show it right now. Leave an empty line between paragraphs."
+         multiline
+         rows={10}
+         defaultValue={values.longDescription}
+@@ -52,7 +52,7 @@ export function ServiceForm({
+       <ImagePicker
+         id="service-image"
+         legend="Picture (optional)"
+-        hint="Shown next to the description on the Services page. PNG, JPG, WebP or SVG, up to 2 MB."
++        hint="Saved for later: the website doesn't show it right now. PNG, JPG, WebP or SVG, up to 2 MB."
+         currentUrl={values.imageUrl}
+         accept="image/png,image/jpeg,image/webp,image/svg+xml"
+         shape="aspect-[4/3]"
+diff --git a/src/app/admin/login/page.tsx b/src/app/admin/login/page.tsx
+index 439b613..def6c63 100644
+--- a/src/app/admin/login/page.tsx
++++ b/src/app/admin/login/page.tsx
+@@ -18,7 +18,10 @@ export default async function AdminLoginPage() {
+   return (
+     <main id="main" className="flex min-h-screen items-start justify-center bg-silver-light px-4 py-12 md:items-center">
+       <div className="w-full max-w-lg rounded-2xl border-2 border-silver bg-white p-6 md:p-10">
+-        <Logo src={settings.logoUrl} name={settings.businessName} />
++        {/* The default logo is silver and blue for dark backgrounds, so it gets a navy plate here. */}
++        <div className={settings.hasCustomLogo ? "" : "inline-block rounded-xl bg-navy px-4 py-3"}>
++          <Logo src={settings.logoUrl} name={settings.businessName} />
++        </div>
+         <h1 className="mt-8 text-[2rem] font-extrabold">Admin login</h1>
+         {adminCount === 0 ? (
+           <div role="alert" className="mt-6 rounded-xl border-4 border-error p-5">
+diff --git a/src/app/apple-icon.png b/src/app/apple-icon.png
+index 07b9da5..3af6b70 100644
+Binary files a/src/app/apple-icon.png and b/src/app/apple-icon.png differ
+diff --git a/src/app/favicon.ico b/src/app/favicon.ico
+index 6043a48..2b8d2ce 100644
+Binary files a/src/app/favicon.ico and b/src/app/favicon.ico differ
+diff --git a/src/app/globals.css b/src/app/globals.css
+index c825112..6af1993 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -1,17 +1,30 @@
+ @import "tailwindcss";
+ 
+-/* Key Express colors. Every text/background pair used on the site meets WCAG AA
+-   (4.5:1); scripts/check-contrast.mjs checks them. Red is only for the
+-   24/7 Emergency badge. */
++/* Key Express colors, from the Color Hunt palette 14279B · 3D56B2 · 5C7AEA · E6E6E6
++   (colorhunt.co/palette/14279b3d56b25c7aeae6e6e6):
++   - royal #14279b: headings and the deep end of the top-section gradient.
++   - navy: royal darkened to #0b1650 for the header, footer and dark bands. The
++     logo's blue letters only reach 3:1 on royal, 4.3:1 here.
++   - action #3d56b2: buttons and links (white text on it is 6.6:1).
++   - periwinkle #5c7aea: glows, accent lines and icons; too light for small
++     text, so sky (#9fb1f5, a tint of it) is the text and icon color on navy.
++   - silver-light #e6e6e6: the alternating light sections, with white cards.
++   Every text/background pair meets WCAG AA; scripts/check-contrast.mjs checks
++   them. Red is only for the 24/7 Emergency badge. */
+ @theme {
+-  --color-navy: #0b2545;
+-  --color-action: #1e56c7;
+-  --color-action-hover: #16439e;
+-  --color-silver: #c5ccd6;
+-  --color-silver-soft: #e9edf2;
+-  --color-silver-light: #f3f5f8;
+-  --color-ink: #1a202c;
+-  --color-ink-soft: #3b4556;
++  --color-royal: #14279b;
++  --color-periwinkle: #5c7aea;
++  --color-navy: #0b1650;
++  --color-navy-deep: #081040;
++  --color-navy-raised: #14279b;
++  --color-action: #3d56b2;
++  --color-action-hover: #14279b;
++  --color-sky: #9fb1f5;
++  --color-silver: #d3d7e6;
++  --color-silver-soft: #edeff7;
++  --color-silver-light: #e6e6e6;
++  --color-ink: #1b1f3b;
++  --color-ink-soft: #4a5070;
+   --color-emergency: #c62828;
+   --color-success: #1e6b3a;
+   --color-error: #b3261e;
+@@ -22,6 +35,8 @@
+ @layer base {
+   :root {
+     color-scheme: light;
++    /* Links to a spot on the page stop below the header bar that follows the visitor down. */
++    scroll-padding-top: 6rem;
+   }
+ 
+   body {
+@@ -34,7 +49,7 @@
+   h1,
+   h2,
+   h3 {
+-    color: var(--color-navy);
++    color: var(--color-royal);
+     font-weight: 700;
+     line-height: 1.2;
+     text-wrap: balance;
+@@ -46,6 +61,13 @@
+     color: #ffffff;
+   }
+ 
++  /* The public site's titles use the logo's lettering. The Admin keeps the body font. */
++  .site-titles :is(h1, h2, h3) {
++    font-family: var(--font-saira), var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
++    font-style: italic;
++    font-weight: 800;
++  }
++
+   a {
+     text-underline-offset: 0.2em;
+   }
+@@ -74,14 +96,6 @@
+   }
+ }
+ 
+-@layer components {
+-  /* The bottom of the brushed-silver gradient is too dark for #1e56c7 text
+-     (4.0:1), so links there use the darker blue (5.6:1). */
+-  .bg-brushed .text-action {
+-    color: var(--color-action-hover);
+-  }
+-}
+-
+ /* Admin-written Markdown (the Privacy Policy and its preview). */
+ @layer components {
+   .policy > * + * {
+@@ -132,8 +146,163 @@
+   }
+ }
+ 
+-@utility bg-brushed {
+-  background-image: linear-gradient(180deg, #e9edf2 0%, #c5ccd6 100%);
++/* Button motion: a soft glow comes up around a button on hover or keyboard focus,
++   the button presses in when tapped, and call buttons can send out a soft pulsing
++   ring. The reduced-motion rule at the end of this file turns the motion off. */
++@layer components {
++  .btn-motion {
++    transition:
++      background-color 0.2s,
++      color 0.2s,
++      box-shadow 0.25s ease-out,
++      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
++  }
++
++  .btn-motion:active {
++    transform: translateY(1px) scale(0.97);
++  }
++
++  .btn-pulse {
++    animation: call-pulse 2.6s ease-out infinite;
++  }
++
++  /* The sticky header bar (sticky-header.tsx). Once the visitor scrolls, it eases into
++     a slimmer look: a smaller logo, a darker bar and a shadow fading in underneath.
++     Only transform, opacity and color change, so nothing on the page moves and the
++     browser doesn't redraw the page on every frame. */
++  .site-header {
++    background-color: var(--color-navy);
++    will-change: transform;
++    transition: background-color 0.3s ease-out;
++  }
++
++  .site-header::after {
++    content: "";
++    position: absolute;
++    inset-inline: 0;
++    top: 100%;
++    height: 18px;
++    background: linear-gradient(rgb(8 16 64 / 0.3), rgb(8 16 64 / 0));
++    opacity: 0;
++    transition: opacity 0.3s ease-out;
++    pointer-events: none;
++  }
++
++  .site-header .header-logo {
++    transform-origin: left center;
++    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
++  }
++
++  .site-header[data-scrolled] {
++    background-color: var(--color-navy-deep);
++  }
++
++  .site-header[data-scrolled]::after {
++    opacity: 1;
++  }
++
++  .site-header[data-scrolled] .header-logo {
++    transform: scale(0.86);
++  }
++
++  /* The pulsing ring repaints every frame; it rests while the bar follows the visitor. */
++  .site-header[data-scrolled] .btn-pulse {
++    animation: none;
++  }
++
++  @media (prefers-reduced-motion: reduce) {
++    .site-header,
++    .site-header::after,
++    .site-header .header-logo {
++      transition: none;
++    }
++  }
++}
++
++/* The home page padlock (lock-illustration.tsx): the shackle snaps shut on load, the
++   keyhole lights up, then the lock floats gently. Still for reduced motion. */
++@media (prefers-reduced-motion: no-preference) {
++  .lock-shackle {
++    animation: lock-close 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s both;
++  }
++
++  .lock-keyglow {
++    animation: lock-light 0.9s ease-out 0.9s both;
++  }
++
++  .lock-float {
++    animation: lock-float 7s ease-in-out 1.2s infinite;
++  }
++}
++
++@keyframes lock-close {
++  from {
++    transform: translateY(-30px);
++  }
++  to {
++    transform: translateY(0);
++  }
++}
++
++@keyframes lock-light {
++  from {
++    opacity: 0;
++  }
++  to {
++    opacity: 1;
++  }
++}
++
++@keyframes lock-float {
++  0%,
++  100% {
++    transform: translateY(0);
++  }
++  50% {
++    transform: translateY(-8px);
++  }
++}
++
++/* Outside the layers so it wins over the buttons' own drop shadows (Tailwind
++   shadow-[…] utilities). A pulsing call button stops pulsing while it glows. */
++.btn-motion:hover,
++.btn-motion:focus-visible {
++  box-shadow:
++    0 0 0 3px var(--glow, rgb(92 122 234 / 0.35)),
++    0 0 26px 2px var(--glow, rgb(92 122 234 / 0.35));
++  animation: none;
++}
++
++@keyframes call-pulse {
++  0% {
++    box-shadow: 0 0 0 0 var(--pulse, rgb(92 122 234 / 0.55));
++  }
++  70%,
++  100% {
++    /* Fade out in the ring's own color, so it doesn't turn grey on midnight. */
++    box-shadow: 0 0 0 14px var(--pulse-end, rgb(92 122 234 / 0));
++  }
++}
++
++/* Deep navy into royal blue with a soft periwinkle glow and a faint dot grid,
++   for the top of each page and the dark bands. Pair it with on-dark and white text. */
++@utility bg-night {
++  background-color: var(--color-navy);
++  background-image:
++    radial-gradient(56rem 28rem at 88% 8%, rgb(92 122 234 / 0.38), transparent 62%),
++    radial-gradient(40rem 22rem at 0% 110%, rgb(61 86 178 / 0.35), transparent 60%),
++    radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1.5px),
++    linear-gradient(160deg, var(--color-navy) 0%, var(--color-royal) 100%);
++  background-size:
++    auto,
++    auto,
++    22px 22px,
++    auto;
++}
++
++/* The thin line along the top of cards: action into periwinkle. */
++@utility bg-electric {
++  background-image: linear-gradient(90deg, var(--color-action) 0%, var(--color-periwinkle) 100%);
+ }
+ 
+ @media (prefers-reduced-motion: no-preference) {
+diff --git a/src/app/icon.svg b/src/app/icon.svg
+deleted file mode 100644
+index d85b517..0000000
+--- a/src/app/icon.svg
++++ /dev/null
+@@ -1,12 +0,0 @@
+-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+-  <defs>
+-    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e56c7"/><stop offset="1" stop-color="#0b2545"/></linearGradient>
+-    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c5ccd6"/></linearGradient>
+-  </defs>
+-  <rect width="64" height="64" rx="16" fill="url(#tile)"/>
+-  <g fill="none" stroke="url(#metal)" stroke-linecap="round" stroke-linejoin="round">
+-    <circle cx="22" cy="22" r="9" stroke-width="6"/>
+-    <path d="M28.5 28.5 49 49" stroke-width="6"/>
+-    <path d="M41 41l5-5M46 46l4-4" stroke-width="5"/>
+-  </g>
+-</svg>
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index f3f9cc3..0c1f723 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -16,6 +16,18 @@ const atkinson = localFont({
+   adjustFontFallback: "Arial",
+ });
+ 
++// Saira Expanded ExtraBold Italic (SIL Open Font License, src/fonts/OFL-Saira.txt)
++// for the public site's titles: wide, slanted letters that match the KEYS EXPRESS
++// logo. One weight, Latin only, cut from Google Fonts' variable Saira at width 125.
++const saira = localFont({
++  src: "../fonts/saira-expanded-extrabold-italic-latin.woff2",
++  weight: "800",
++  style: "italic",
++  variable: "--font-saira",
++  display: "swap",
++  adjustFontFallback: "Arial",
++});
++
+ // Every page is rendered when it's requested, from the server's database. Nothing
+ // is baked in at build time: the build machine's database is not the live one,
+ // and the Admin's changes must show up as soon as they're saved.
+@@ -26,12 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
+ }
+ 
+ export const viewport: Viewport = {
+-  themeColor: "#0b2545",
++  themeColor: "#0b1650",
+ };
+ 
+ export default function RootLayout({ children }: LayoutProps<"/">) {
+   return (
+-    <html lang="en" className={atkinson.variable}>
++    // data-scroll-behavior: Next.js turns smooth scrolling off while it changes pages.
++    // Without it, opening the home page from another page stopped partway down.
++    <html lang="en" data-scroll-behavior="smooth" className={`${atkinson.variable} ${saira.variable}`}>
+       <body className="font-sans">{children}</body>
+     </html>
+   );
+diff --git a/src/app/not-found.tsx b/src/app/not-found.tsx
+index ec4b316..f347f7c 100644
+--- a/src/app/not-found.tsx
++++ b/src/app/not-found.tsx
+@@ -17,11 +17,11 @@ export default async function NotFound() {
+ 
+   return (
+     <SiteChrome>
+-      <div className="bg-brushed">
++      <div className="on-dark bg-night text-white">
+         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 md:py-24">
+           <h1 className="text-[2rem] font-extrabold md:text-5xl">{fillPlaceholders(content.heading, placeholders)}</h1>
+-          <p className="mt-5 text-xl">
+-            <FilledText text={content.text} placeholders={placeholders} />
++          <p className="mt-5 text-xl text-silver-soft">
++            <FilledText text={content.text} placeholders={placeholders} tone="dark" />
+           </p>
+           <div className="mt-8">
+             <ButtonLink href="/" className="w-full sm:w-auto">
+@@ -30,7 +30,7 @@ export default async function NotFound() {
+             </ButtonLink>
+           </div>
+           <p className="mt-8">
+-            <PhoneNumberLink phone={settings.phone} className="text-3xl text-navy hover:text-action-hover" />
++            <PhoneNumberLink phone={settings.phone} tone="dark" className="text-3xl" />
+           </p>
+         </div>
+       </div>
+diff --git a/src/app/og-image/route.tsx b/src/app/og-image/route.tsx
+index a153128..78f2698 100644
+--- a/src/app/og-image/route.tsx
++++ b/src/app/og-image/route.tsx
+@@ -9,11 +9,14 @@ import { db } from "@/server/db";
+ export const dynamic = "force-dynamic";
+ 
+ export async function GET() {
+-  const [settings, font] = await Promise.all([
++  const [settings, font, titleFont, logoFile] = await Promise.all([
+     getBusinessSettings(db),
+-    // The site's font; the image renderer needs it as TTF rather than WOFF2.
++    // The site's fonts; the image renderer needs them as TTF rather than WOFF2.
+     readFile(path.join(process.cwd(), "src/fonts/atkinson-hyperlegible-next-extrabold.ttf")),
++    readFile(path.join(process.cwd(), "src/fonts/saira-expanded-extrabold-italic.ttf")),
++    readFile(path.join(process.cwd(), "public/logo.png")),
+   ]);
++  const logo = `data:image/png;base64,${logoFile.toString("base64")}`;
+   return new ImageResponse(
+     (
+       <div
+@@ -24,24 +27,18 @@ export async function GET() {
+           flexDirection: "column",
+           justifyContent: "center",
+           padding: "80px",
+-          background: "linear-gradient(135deg, #0b2545 0%, #16439e 100%)",
++          background: "radial-gradient(circle at 85% 10%, #5c7aea 0%, #14279b 38%, #0b1650 75%)",
+           color: "#ffffff",
+           fontFamily: "Atkinson Hyperlegible Next",
+         }}
+       >
+-        <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
+-          <svg width="120" height="120" viewBox="0 0 64 64">
+-            <rect width="64" height="64" rx="16" fill="#e9edf2" />
+-            <g fill="none" stroke="#0b2545" strokeLinecap="round" strokeLinejoin="round">
+-              <circle cx="22" cy="22" r="9" strokeWidth="6" />
+-              <path d="M28.5 28.5 49 49" strokeWidth="6" />
+-              <path d="M41 41l5-5M46 46l4-4" strokeWidth="5" />
+-            </g>
+-          </svg>
+-          <div style={{ fontSize: 84, fontWeight: 700, letterSpacing: "2px" }}>{settings.businessName.toUpperCase()}</div>
++        {/* The default logo, made for dark backgrounds (585×168). */}
++        {/* eslint-disable-next-line @next/next/no-img-element */}
++        <img src={logo} alt="" width={522} height={150} />
++        <div style={{ marginTop: "48px", fontSize: 48, fontFamily: "Saira Expanded", fontStyle: "italic", fontWeight: 800 }}>
++          24/7 Mobile Locksmith
+         </div>
+-        <div style={{ marginTop: "48px", fontSize: 52, fontWeight: 700 }}>24/7 Mobile Locksmith</div>
+-        <div style={{ marginTop: "16px", fontSize: 36, color: "#e9edf2" }}>
++        <div style={{ marginTop: "16px", fontSize: 36, color: "#e6ecf4" }}>
+           {`Cars, homes, and businesses in ${settings.serviceAreaCity} and nearby areas`}
+         </div>
+         <div style={{ marginTop: "48px", fontSize: 56, fontWeight: 700 }}>{settings.phone}</div>
+@@ -50,7 +47,10 @@ export async function GET() {
+     {
+       width: 1200,
+       height: 630,
+-      fonts: [{ name: "Atkinson Hyperlegible Next", data: font, weight: 800, style: "normal" }],
++      fonts: [
++        { name: "Atkinson Hyperlegible Next", data: font, weight: 800, style: "normal" },
++        { name: "Saira Expanded", data: titleFont, weight: 800, style: "italic" },
++      ],
+       headers: { "Cache-Control": "public, max-age=3600" },
+     },
+   );
+diff --git a/src/components/site/blocks.tsx b/src/components/site/blocks.tsx
+index ec60395..0cc9791 100644
+--- a/src/components/site/blocks.tsx
++++ b/src/components/site/blocks.tsx
+@@ -17,9 +17,9 @@ export function WhyChooseUsBadges({
+       {badges.map((badge) => (
+         <li
+           key={badge.title}
+-          className="flex flex-col items-center rounded-2xl border-2 border-silver bg-white px-3 py-6 text-center last:odd:col-span-2 lg:last:odd:col-span-1"
++          className="flex flex-col items-center rounded-2xl border border-silver bg-white px-3 py-6 text-center shadow-[0_14px_34px_-22px_rgb(20_39_155/0.25)] last:odd:col-span-2 lg:last:odd:col-span-1"
+         >
+-          <span className="flex size-16 items-center justify-center rounded-full bg-action text-white">
++          <span className="flex size-16 items-center justify-center rounded-2xl bg-linear-to-br from-royal to-action text-white shadow-[0_10px_24px_-10px_rgb(20_39_155/0.6)]">
+             <NamedIcon name={badge.icon} aria-hidden="true" className="size-8" />
+           </span>
+           <h3 className="mt-4 text-lg md:text-xl">{fillPlaceholders(badge.title, placeholders)}</h3>
+@@ -44,8 +44,8 @@ export function ServiceCard({
+   placeholders: PlaceholderValues;
+ }) {
+   return (
+-    <li className="flex flex-col overflow-hidden rounded-2xl border-2 border-silver bg-white">
+-      <div className="bg-brushed h-2" />
++    <li className="flex flex-col overflow-hidden rounded-2xl border border-silver bg-white shadow-[0_14px_34px_-22px_rgb(20_39_155/0.25)]">
++      <div className="bg-electric h-1.5" />
+       <div className="flex flex-1 flex-col p-6">
+         <NamedIcon name={service.icon} aria-hidden="true" className="size-10 text-action" />
+         <h3 className="mt-4 text-xl">{service.title}</h3>
+@@ -68,7 +68,7 @@ export function FaqList({ faqs, placeholders, className }: { faqs: Faq[]; placeh
+   return (
+     <div className={className}>
+       {faqs.map((item) => (
+-        <details key={item.id} className="group mb-4 rounded-2xl border-2 border-silver bg-white last:mb-0">
++        <details key={item.id} className="group mb-4 rounded-2xl border border-silver bg-white shadow-[0_10px_28px_-22px_rgb(20_39_155/0.2)] last:mb-0">
+           <summary className="flex min-h-16 items-center justify-between gap-4 rounded-2xl p-5 text-xl font-bold text-navy hover:bg-silver-light">
+             {fillPlaceholders(item.question, placeholders)}
+             <ChevronDown aria-hidden="true" className="size-7 shrink-0 transition-transform group-open:rotate-180" />
+diff --git a/src/components/site/buttons.tsx b/src/components/site/buttons.tsx
+index 4f41d7d..4aeaebe 100644
+--- a/src/components/site/buttons.tsx
++++ b/src/components/site/buttons.tsx
+@@ -5,14 +5,20 @@ import { cn } from "@/lib/cn";
+ import { telHref } from "@/lib/phone";
+ 
+ const base =
+-  "inline-flex min-h-14 items-center justify-center gap-3 rounded-xl px-6 py-3 text-center text-lg font-bold no-underline transition-colors";
++  "btn-motion inline-flex min-h-14 items-center justify-center gap-3 rounded-xl px-6 py-3 text-center text-lg font-bold no-underline";
+ 
++// --glow is the soft light around a button on hover, --pulse the ring a call button sends out.
+ const variants = {
+-  // Blue button for white and silver backgrounds.
+-  primary: "bg-action text-white hover:bg-action-hover",
+-  secondary: "border-2 border-action bg-white text-action hover:bg-silver-light hover:text-action-hover",
+-  // White button for dark blue backgrounds.
+-  light: "bg-white text-navy hover:bg-silver-soft",
++  // Calling on light backgrounds: the palette's blue into royal.
++  call: "bg-linear-to-br from-action to-royal text-white shadow-[0_10px_28px_-10px_rgb(20_39_155/0.7)] hover:from-royal hover:to-royal",
++  // Blue button for white and light backgrounds.
++  primary: "bg-action text-white shadow-[0_8px_24px_-12px_rgb(61_86_178/0.8)] hover:bg-action-hover",
++  secondary:
++    "border-2 border-action bg-white text-action hover:bg-silver-soft hover:text-action-hover",
++  // White button for the dark blue header and bands (calling there too).
++  light: "bg-white text-royal shadow-[0_10px_28px_-10px_rgb(0_0_0/0.5)] hover:bg-silver-soft [--pulse:rgb(255_255_255/0.6)] [--pulse-end:rgb(255_255_255/0)] [--glow:rgb(159_177_245/0.55)]",
++  // Outlined button for the dark blue header and bands.
++  outlineLight: "border-2 border-white/60 text-white hover:border-white hover:bg-white/10 [--glow:rgb(159_177_245/0.55)]",
+ };
+ 
+ export type ButtonVariant = keyof typeof variants;
+@@ -46,33 +52,56 @@ export function ButtonLink({
+   );
+ }
+ 
++// `withNumber` shows "Call (555) 014-7823" in one button; `pulse` adds the ring.
+ export function CallButton({
+   phone,
+   label = "Call Now",
+-  variant = "primary",
++  variant = "call",
+   className,
++  withNumber = false,
++  pulse = false,
+ }: {
+   phone: string;
+   label?: string;
+   variant?: ButtonVariant;
+   className?: string;
++  withNumber?: boolean;
++  pulse?: boolean;
+ }) {
+   return (
+-    <a href={telHref(phone)} className={buttonClasses(variant, className)}>
++    <a href={telHref(phone)} className={buttonClasses(variant, cn(pulse && "btn-pulse", "whitespace-nowrap", className))}>
+       <Phone aria-hidden="true" className="size-6 shrink-0" strokeWidth={2.25} />
+-      <span>
+-        {label}
+-        <span className="sr-only"> at {phone}</span>
+-      </span>
++      {withNumber ? (
++        <span>Call {phone}</span>
++      ) : (
++        <span>
++          {label}
++          <span className="sr-only"> at {phone}</span>
++        </span>
++      )}
+     </a>
+   );
+ }
+ 
+ // The phone number as large, tappable text.
+-export function PhoneNumberLink({ phone, className }: { phone: string; className?: string }) {
++// Bold, no underline, with a colored phone icon; the color changes on hover.
++export function PhoneNumberLink({
++  phone,
++  className,
++  tone = "light",
++}: {
++  phone: string;
++  className?: string;
++  tone?: "light" | "dark";
++}) {
++  const colors =
++    tone === "dark" ? { link: "text-white hover:text-sky", icon: "text-sky" } : { link: "text-navy hover:text-action-hover", icon: "text-action" };
+   return (
+-    <a href={telHref(phone)} className={cn("inline-flex items-center gap-2 font-bold whitespace-nowrap", className)}>
+-      <Phone aria-hidden="true" className="size-[1em] shrink-0" strokeWidth={2.5} />
++    <a
++      href={telHref(phone)}
++      className={cn("inline-flex items-center gap-2 font-bold whitespace-nowrap transition-colors", colors.link, className)}
++    >
++      <Phone aria-hidden="true" className={cn("size-[1em] shrink-0", colors.icon)} strokeWidth={2.5} />
+       {phone}
+     </a>
+   );
+diff --git a/src/components/site/key-illustration.tsx b/src/components/site/key-illustration.tsx
+deleted file mode 100644
+index 8b18e13..0000000
+--- a/src/components/site/key-illustration.tsx
++++ /dev/null
+@@ -1,23 +0,0 @@
+-// A large silver key on a blue tile, the same mark as the default logo. Decorative.
+-export function KeyIllustration({ className }: { className?: string }) {
+-  return (
+-    <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false" className={className}>
+-      <defs>
+-        <linearGradient id="key-illustration-tile" x1="0" y1="0" x2="1" y2="1">
+-          <stop offset="0" stopColor="#1e56c7" />
+-          <stop offset="1" stopColor="#0b2545" />
+-        </linearGradient>
+-        <linearGradient id="key-illustration-metal" x1="0" y1="0" x2="1" y2="1">
+-          <stop offset="0" stopColor="#ffffff" />
+-          <stop offset="1" stopColor="#c5ccd6" />
+-        </linearGradient>
+-      </defs>
+-      <rect width="64" height="64" rx="16" fill="url(#key-illustration-tile)" />
+-      <g fill="none" stroke="url(#key-illustration-metal)" strokeLinecap="round" strokeLinejoin="round">
+-        <circle cx="22" cy="22" r="9" strokeWidth="6" />
+-        <path d="M28.5 28.5 49 49" strokeWidth="6" />
+-        <path d="M41 41l5-5M46 46l4-4" strokeWidth="5" />
+-      </g>
+-    </svg>
+-  );
+-}
+diff --git a/src/components/site/logo.tsx b/src/components/site/logo.tsx
+index a7936df..6caac5f 100644
+--- a/src/components/site/logo.tsx
++++ b/src/components/site/logo.tsx
+@@ -1,10 +1,28 @@
+ import { cn } from "@/lib/cn";
+ 
++const HEIGHTS = { normal: { px: 48, className: "h-12" }, large: { px: 64, className: "h-16" } };
++
+ // A plain <img>: the logo may be an SVG or an uploaded image of any shape, so it
+ // keeps a fixed height and its own width. next/image doesn't resize SVGs anyway.
+-export function Logo({ src, name, className }: { src: string; name: string; className?: string }) {
++export function Logo({
++  src,
++  name,
++  className,
++  size = "normal",
++}: {
++  src: string;
++  name: string;
++  className?: string;
++  size?: keyof typeof HEIGHTS;
++}) {
++  const height = HEIGHTS[size];
+   return (
+     // eslint-disable-next-line @next/next/no-img-element
+-    <img src={src} alt={name} height={48} className={cn("h-12 w-auto max-w-full object-contain object-left", className)} />
++    <img
++      src={src}
++      alt={name}
++      height={height.px}
++      className={cn(height.className, "w-auto max-w-full object-contain object-left", className)}
++    />
+   );
+ }
+diff --git a/src/components/site/mobile-menu.tsx b/src/components/site/mobile-menu.tsx
+index 7c48b22..85da315 100644
+--- a/src/components/site/mobile-menu.tsx
++++ b/src/components/site/mobile-menu.tsx
+@@ -3,10 +3,11 @@
+ import { Menu, X } from "lucide-react";
+ import { usePathname } from "next/navigation";
+ import { useEffect, useId, useRef, useState } from "react";
++import type { MenuLink } from "@/lib/navigation";
+ import { NavLinks } from "./nav-links";
+ 
+ // The phone-sized menu: a big button that says "Menu", opening a list of big links.
+-export function MobileMenu() {
++export function MobileMenu({ links }: { links: MenuLink[] }) {
+   const pathname = usePathname();
+   // The menu belongs to the page it was opened on, so moving to another page closes it.
+   const [openOn, setOpenOn] = useState<string | null>(null);
+@@ -45,7 +46,10 @@ export function MobileMenu() {
+         // A white panel inside the dark header, so it uses the light-background focus outline.
+         className="on-light absolute inset-x-0 top-full z-30 border-b-4 border-silver bg-white shadow-lg"
+       >
++        {/* Services and FAQ scroll within the home page, which doesn't change the page, so a tap closes the menu itself. */}
+         <NavLinks
++          links={links}
++          onNavigate={() => setOpenOn(null)}
+           tone="light"
+           className="mx-auto flex max-w-6xl flex-col px-4 py-2"
+           linkClassName="flex min-h-14 items-center border-b border-silver-soft px-2 text-xl font-bold"
+diff --git a/src/components/site/nav-links.tsx b/src/components/site/nav-links.tsx
+index d190646..f0815ea 100644
+--- a/src/components/site/nav-links.tsx
++++ b/src/components/site/nav-links.tsx
+@@ -3,33 +3,48 @@
+ import Link from "next/link";
+ import { usePathname } from "next/navigation";
+ import { cn } from "@/lib/cn";
+-import { mainNav } from "@/lib/navigation";
++import type { MenuLink } from "@/lib/navigation";
+ 
+ const tones = {
+   // On the dark blue header bar.
+-  dark: { current: "text-white underline decoration-[3px]", other: "text-white hover:underline" },
++  dark: { current: "text-white underline decoration-sky decoration-[3px]", other: "text-white hover:text-sky" },
+   // In the white drop-down menu on phones.
+   light: { current: "text-action underline decoration-[3px]", other: "text-navy hover:text-action hover:underline" },
+ };
+ 
+ export function NavLinks({
++  links,
+   tone,
++  onNavigate,
+   className,
+   linkClassName,
+ }: {
++  links: MenuLink[];
+   tone: keyof typeof tones;
++  onNavigate?: () => void;
+   className?: string;
+   linkClassName?: string;
+ }) {
+   const pathname = usePathname();
+   return (
+     <ul className={className}>
+-      {mainNav.map((item) => {
+-        const current = pathname === item.path;
++      {links.map((item) => {
++        // Links to a spot on the home page ("/#faq") never count as the current page.
++        const current = pathname === item.href;
+         return (
+-          <li key={item.path}>
++          <li key={item.href}>
+             <Link
+-              href={item.path}
++              href={item.href}
++              onClick={(event) => {
++                onNavigate?.();
++                // On the home page, scroll to the section ourselves: a second click on
++                // FAQ (address already /#faq) would otherwise do nothing.
++                const target = pathname === "/" && item.href.startsWith("/#") && document.getElementById(item.href.slice(2));
++                if (!target) return;
++                event.preventDefault();
++                target.scrollIntoView();
++                window.history.pushState(null, "", item.href);
++              }}
+               aria-current={current ? "page" : undefined}
+               className={cn(linkClassName, current ? tones[tone].current : tones[tone].other)}
+             >
+diff --git a/src/components/site/section.tsx b/src/components/site/section.tsx
+index f867995..e7d9e9d 100644
+--- a/src/components/site/section.tsx
++++ b/src/components/site/section.tsx
+@@ -4,8 +4,7 @@ import { cn } from "@/lib/cn";
+ const tones = {
+   white: "bg-white",
+   silver: "bg-silver-light",
+-  brushed: "bg-brushed",
+-  navy: "on-dark bg-navy text-white",
++  navy: "on-dark bg-night text-white",
+ };
+ 
+ export function Section({
+diff --git a/src/components/site/site-chrome.tsx b/src/components/site/site-chrome.tsx
+index e232d74..033ff8b 100644
+--- a/src/components/site/site-chrome.tsx
++++ b/src/components/site/site-chrome.tsx
+@@ -1,40 +1,67 @@
++import { Siren } from "lucide-react";
+ import type { ReactNode } from "react";
+-import { getSections, getSettings } from "@/server/site-data";
++import { footerLinks, visibleMenuLinks } from "@/lib/navigation";
++import { getSections, getSettings, getVisibleFaqs, getVisibleServices } from "@/server/site-data";
+ import { SiteFooter } from "./site-footer";
++import { ScrollTopOnBack } from "./scroll-top-on-back";
+ import { SiteHeader } from "./site-header";
+ import { StickyCallBar } from "./sticky-call-bar";
+ 
+ // Everything around a public page's content. Used by the public pages' layout
+ // and by the "page not found" page, which sits outside that layout.
+ export async function SiteChrome({ children }: { children: ReactNode }) {
+-  const [settings, sections] = await Promise.all([getSettings(), getSections()]);
++  const [settings, sections, services, faqs] = await Promise.all([
++    getSettings(),
++    getSections(),
++    getVisibleServices(),
++    getVisibleFaqs(),
++  ]);
++  // The same checks the home page uses to show these sections.
++  const menu = visibleMenuLinks({
++    services: sections["home.services"].visible && services.length > 0,
++    faq: sections["home.faq"].visible && faqs.length > 0,
++  });
+   return (
+-    <>
++    <div className="site-titles">
++      <ScrollTopOnBack />
+       <a
+         href="#main"
+         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-lg focus:font-bold focus:text-navy"
+       >
+         Skip to main content
+       </a>
+-      <SiteHeader settings={settings} />
++      <SiteHeader settings={settings} menu={menu} />
+       <main id="main" tabIndex={-1} className="outline-none">
+         {children}
+       </main>
+       {/* Room below the footer so the sticky call bar never covers the end of the page. */}
+-      <div className="bg-navy pb-28 lg:pb-0">
+-        <SiteFooter settings={settings} />
++      <div className="bg-navy-deep pb-28 lg:pb-0">
++        <SiteFooter settings={settings} links={footerLinks(menu)} />
+       </div>
+       <StickyCallBar phone={settings.phone} homeHasRequestForm={sections["home.request"].visible} />
+-    </>
++    </div>
++  );
++}
++
++// The red "24/7 Emergency Service" advert above each page's main heading
++// (Business Settings can turn it off).
++export function EmergencyServiceBadge() {
++  return (
++    <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-emergency px-4 py-1.5 text-lg font-bold text-white">
++      <Siren aria-hidden="true" className="size-5 shrink-0" />
++      24/7 Emergency Service
++    </p>
+   );
+ }
+ 
+-export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
++export async function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
++  const settings = await getSettings();
+   return (
+-    <div className="bg-brushed">
++    <div className="on-dark bg-night text-white">
+       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-16">
++        {settings.emergencyBadge && <EmergencyServiceBadge />}
+         <h1 className="text-[2rem] font-extrabold md:text-5xl">{title}</h1>
+-        {children && <div className="mt-4 max-w-3xl text-xl">{children}</div>}
++        {children && <div className="mt-4 max-w-3xl text-xl text-silver-soft">{children}</div>}
+       </div>
+     </div>
+   );
+diff --git a/src/components/site/site-footer.tsx b/src/components/site/site-footer.tsx
+index 132a6e2..13b1673 100644
+--- a/src/components/site/site-footer.tsx
++++ b/src/components/site/site-footer.tsx
+@@ -1,7 +1,7 @@
+ import { Banknote, CreditCard, Mail, Smartphone } from "lucide-react";
+ import { createElement } from "react";
+ import Link from "next/link";
+-import { footerLinks } from "@/lib/navigation";
++import type { MenuLink } from "@/lib/navigation";
+ import { placeholderValues } from "@/lib/placeholders";
+ import type { BusinessSettings } from "@/server/content";
+ import { PhoneNumberLink } from "./buttons";
+@@ -14,15 +14,19 @@ function paymentIcon(method: string) {
+   return CreditCard;
+ }
+ 
+-export function SiteFooter({ settings }: { settings: BusinessSettings }) {
++export function SiteFooter({ settings, links }: { settings: BusinessSettings; links: MenuLink[] }) {
+   return (
+-    <footer className="on-dark bg-navy text-white">
++    <footer className="on-dark border-t border-white/10 bg-navy-deep text-white">
+       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+         <div className="space-y-4">
+-          {/* A white plate keeps any uploaded logo readable on dark blue. */}
+-          <div className="inline-block rounded-xl bg-white px-4 py-3">
+-            <Logo src={settings.logoUrl} name={settings.businessName} />
+-          </div>
++          {/* The default logo is made for dark blue; an uploaded one gets a white plate to stay readable. */}
++          {settings.hasCustomLogo ? (
++            <div className="inline-block rounded-xl bg-white px-4 py-3">
++              <Logo src={settings.logoUrl} name={settings.businessName} />
++            </div>
++          ) : (
++            <Logo src={settings.logoUrl} name={settings.businessName} size="large" />
++          )}
+           <p>
+             <FilledText text={settings.footerText} placeholders={placeholderValues(settings)} tone="dark" />
+           </p>
+@@ -30,7 +34,7 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+ 
+         <div className="space-y-3">
+           <h2 className="text-xl">Contact Us</h2>
+-          <PhoneNumberLink phone={settings.phone} className="text-2xl text-white underline" />
++          <PhoneNumberLink phone={settings.phone} tone="dark" className="text-2xl" />
+           <p>
+             <a href={`mailto:${settings.email}`} className="inline-flex items-center gap-2 break-all text-white underline">
+               <Mail aria-hidden="true" className="size-5 shrink-0" />
+@@ -44,9 +48,9 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+         <nav aria-label="Footer" className="space-y-3">
+           <h2 className="text-xl">Pages</h2>
+           <ul className="space-y-1">
+-            {footerLinks.map((link) => (
+-              <li key={link.path}>
+-                <Link href={link.path} className="inline-flex min-h-11 items-center text-white underline">
++            {links.map((link) => (
++              <li key={link.href}>
++                <Link href={link.href} className="inline-flex min-h-11 items-center text-white underline">
+                   {link.label}
+                 </Link>
+               </li>
+diff --git a/src/components/site/site-header.tsx b/src/components/site/site-header.tsx
+index ac849a3..28d3039 100644
+--- a/src/components/site/site-header.tsx
++++ b/src/components/site/site-header.tsx
+@@ -1,55 +1,55 @@
+ import Link from "next/link";
++import { cn } from "@/lib/cn";
++import type { MenuLink } from "@/lib/navigation";
+ import type { BusinessSettings } from "@/server/content";
+ import { CallButton, PhoneNumberLink } from "./buttons";
+ import { Logo } from "./logo";
+ import { MobileMenu } from "./mobile-menu";
+ import { NavLinks } from "./nav-links";
++import { StickyHeader } from "./sticky-header";
+ 
+-// The red "24/7 Emergency Service" advert (Business Settings can turn it off).
+-export function EmergencyServiceBadge() {
++export function SiteHeader({ settings, menu }: { settings: BusinessSettings; menu: MenuLink[] }) {
+   return (
+-    <p className="inline-flex items-center rounded-full bg-emergency px-3 py-1 text-lg font-bold text-white">
+-      24/7 Emergency Service
+-    </p>
+-  );
+-}
+-
+-export function SiteHeader({ settings }: { settings: BusinessSettings }) {
+-  return (
+-    <header className="on-dark relative bg-navy text-white">
+-      <div className="border-b border-white/20">
++    <>
++      {/* From 1024px the strip only has the license number to show, so without one it goes. */}
++      <div className={cn("on-dark border-b border-white/10 bg-navy-deep text-white", !settings.licenseNumber && "lg:hidden")}>
+         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2 sm:px-6">
+-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+-            {settings.emergencyBadge && <EmergencyServiceBadge />}
+-            {settings.licenseNumber && <p className="text-lg">License #{settings.licenseNumber}</p>}
+-          </div>
+-          {/* Up to 1279px the big number lives up here; from 1280px it sits beside the menu. */}
+-          <div className="xl:hidden">
+-            <PhoneNumberLink phone={settings.phone} className="text-xl text-white underline lg:text-2xl" />
++          {settings.licenseNumber && <p className="text-lg">License #{settings.licenseNumber}</p>}
++          {/* On phones and tablets the number lives up here; from 1024px it is in the Call button. */}
++          <div className="lg:hidden">
++            <PhoneNumberLink phone={settings.phone} tone="dark" className="text-xl lg:text-2xl" />
+           </div>
+         </div>
+       </div>
+-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+-        {/* A white plate keeps any uploaded logo readable on dark blue. On narrow
+-            phones the logo shrinks so the Menu button always fits. */}
+-        <Link href="/" className="min-w-0 rounded-xl bg-white px-3 py-2 lg:shrink-0">
+-          <Logo src={settings.logoUrl} name={`${settings.businessName} home page`} className="max-w-[240px]" />
+-        </Link>
+-        <nav aria-label="Main" className="hidden lg:block">
+-          <NavLinks
+-            tone="dark"
+-            className="flex items-center gap-1"
+-            linkClassName="block rounded-lg px-3 py-2 text-lg font-bold"
+-          />
+-        </nav>
+-        <div className="hidden items-center gap-4 lg:flex">
+-          <div className="hidden xl:block">
+-            <PhoneNumberLink phone={settings.phone} className="text-2xl text-white underline" />
++      {/* The main bar comes down the page with the visitor. */}
++      <StickyHeader>
++        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
++          {/* The default logo is made for dark blue, so it sits on the header as is. An
++              uploaded logo gets a white plate to stay readable. On narrow phones the
++              logo shrinks so the Menu button always fits. */}
++          {settings.hasCustomLogo ? (
++            <Link href="/" className="header-logo min-w-0 rounded-xl bg-white px-3 py-2 lg:shrink-0">
++              <Logo src={settings.logoUrl} name={`${settings.businessName} home page`} className="max-w-[240px]" />
++            </Link>
++          ) : (
++            <Link href="/" className="header-logo min-w-0 rounded-lg lg:shrink-0">
++              <Logo src={settings.logoUrl} name={`${settings.businessName} home page`} size="large" />
++            </Link>
++          )}
++          <nav aria-label="Main" className="hidden lg:block">
++            <NavLinks
++              links={menu}
++              tone="dark"
++              className="flex items-center gap-1"
++              linkClassName="block rounded-lg px-3 py-2 text-lg font-bold"
++            />
++          </nav>
++          <div className="hidden lg:block">
++            <CallButton phone={settings.phone} variant="light" withNumber pulse />
+           </div>
+-          <CallButton phone={settings.phone} variant="light" />
++          <MobileMenu links={menu} />
+         </div>
+-        <MobileMenu />
+-      </div>
+-    </header>
++      </StickyHeader>
++    </>
+   );
+ }
+diff --git a/src/components/site/sticky-call-bar.tsx b/src/components/site/sticky-call-bar.tsx
+index 45f5326..b997635 100644
+--- a/src/components/site/sticky-call-bar.tsx
++++ b/src/components/site/sticky-call-bar.tsx
+@@ -9,9 +9,9 @@ import { ButtonLink, CallButton } from "./buttons";
+ export function StickyCallBar({ phone, homeHasRequestForm }: { phone: string; homeHasRequestForm: boolean }) {
+   const pathname = usePathname();
+   return (
+-    <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-silver bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(11,37,69,0.12)] lg:hidden">
++    <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-silver bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(20,39,155,0.14)] lg:hidden">
+       <div className="mx-auto grid max-w-xl grid-cols-2 gap-3">
+-        <CallButton phone={phone} className="px-2 min-[400px]:px-3" />
++        <CallButton phone={phone} pulse className="px-2 min-[400px]:px-3" />
+         <ButtonLink href={requestServiceHref(pathname, homeHasRequestForm)} variant="secondary" className="px-2 min-[400px]:px-3">
+           <ClipboardList aria-hidden="true" className="size-6 shrink-0 max-[400px]:hidden" />
+           Request Service
+diff --git a/src/lib/navigation.ts b/src/lib/navigation.ts
+index 0c0af85..ce5f856 100644
+--- a/src/lib/navigation.ts
++++ b/src/lib/navigation.ts
+@@ -1,17 +1,31 @@
+-// Every public page, in menu order. The menu, the footer, the sitemap and the
+-// Admin's Search & Sharing list all come from this one list.
++// Every public page. The sitemap and the Admin's Search & Sharing list come from this list.
+ export const publicPages = [
+-  { path: "/", label: "Home", inMenu: true, adminName: "Home page", sitemapPriority: 1 },
+-  { path: "/services", label: "Services", inMenu: true, adminName: "Services page", sitemapPriority: 0.9 },
+-  { path: "/about", label: "About", inMenu: true, adminName: "About page", sitemapPriority: 0.6 },
+-  { path: "/faq", label: "FAQ", inMenu: true, adminName: "Questions (FAQ) page", sitemapPriority: 0.6 },
+-  { path: "/contact", label: "Contact", inMenu: true, adminName: "Contact page", sitemapPriority: 0.8 },
+-  { path: "/privacy-policy", label: "Privacy Policy", inMenu: false, adminName: "Privacy Policy page", sitemapPriority: 0.2 },
++  { path: "/", adminName: "Home page", sitemapPriority: 1 },
++  { path: "/about", adminName: "About page", sitemapPriority: 0.6 },
++  { path: "/contact", adminName: "Contact page", sitemapPriority: 0.8 },
++  { path: "/privacy-policy", adminName: "Privacy Policy page", sitemapPriority: 0.2 },
+ ] as const;
+ 
+-export const mainNav = publicPages.filter((page) => page.inMenu);
++export type MenuLink = { href: string; label: string; homeSection?: "services" | "faq" };
+ 
+-export const footerLinks = publicPages.filter((page) => page.path !== "/");
++// The menu, in order. Services and FAQ scroll to their sections on the home page,
++// so they only show while the home page shows that section.
++export const menuLinks: MenuLink[] = [
++  { href: "/", label: "Home" },
++  { href: "/#services", label: "Services", homeSection: "services" },
++  { href: "/about", label: "About" },
++  { href: "/#faq", label: "FAQ", homeSection: "faq" },
++  { href: "/contact", label: "Contact" },
++];
++
++export function visibleMenuLinks(homeShows: Record<NonNullable<MenuLink["homeSection"]>, boolean>) {
++  return menuLinks.filter((link) => !link.homeSection || homeShows[link.homeSection]);
++}
++
++// The footer has the menu without Home, plus the Privacy Policy.
++export function footerLinks(menu: MenuLink[]) {
++  return [...menu.filter((link) => link.href !== "/"), { href: "/privacy-policy", label: "Privacy Policy" }];
++}
+ 
+ // "Request Service" scrolls to the form on the home page and opens the Contact
+ // page (which has the same form) everywhere else, and from the home page too
+diff --git a/src/lib/page-sections.ts b/src/lib/page-sections.ts
+index de20148..70f8a30 100644
+--- a/src/lib/page-sections.ts
++++ b/src/lib/page-sections.ts
+@@ -28,7 +28,7 @@ const badge = z.object({
+ 
+ type FieldKind = "line" | "text" | "badges";
+ type FieldMeta = { label: string; kind: FieldKind };
+-type Page = "home" | "services" | "about" | "faq" | "contact" | "not-found";
++type Page = "home" | "about" | "contact" | "not-found";
+ 
+ function section<S extends z.ZodObject>(definition: {
+   title: string;
+@@ -89,12 +89,11 @@ export const pageSections = {
+   "home.services": section({
+     title: "Our services",
+     page: "home",
+-    schema: z.object({ heading: line(), text: text(), cardLink: line(40), button: line(40) }),
++    schema: z.object({ heading: line(), text: text(), cardLink: line(40) }),
+     fields: {
+       heading,
+       text: paragraph,
+       cardLink: { label: "Link on each service card (calls you)", kind: "line" },
+-      button: { label: "Button text (opens the Services page)", kind: "line" },
+     },
+   }),
+   "home.fobHighlight": section({
+@@ -132,29 +131,12 @@ export const pageSections = {
+     schema: z.object({ heading: line(), text: text() }),
+     fields: { heading, text: { label: "Text above the list of towns", kind: "text" } },
+   }),
+-  "services.intro": section({
+-    title: "Services page",
+-    page: "services",
+-    schema: z.object({ heading: line(), text: text(), jumpHeading: line(60) }),
+-    fields: { heading, text: paragraph, jumpHeading: { label: "Heading above the list of service links", kind: "line" } },
+-  }),
+   "about.intro": section({
+     title: "About page",
+     page: "about",
+     schema: z.object({ heading: line(), text: text(5000) }),
+     fields: { heading, text: { label: "Text (leave an empty line between paragraphs)", kind: "text" } },
+   }),
+-  "faq.intro": section({
+-    title: "Questions page",
+-    page: "faq",
+-    schema: z.object({ heading: line(), text: text(), closingHeading: line(80), closingText: text(300) }),
+-    fields: {
+-      heading,
+-      text: paragraph,
+-      closingHeading: { label: "Heading of the box at the end", kind: "line" },
+-      closingText: { label: "Text of the box at the end", kind: "text" },
+-    },
+-  }),
+   "contact.intro": section({
+     title: "Contact page",
+     page: "contact",
+diff --git a/src/server/content.ts b/src/server/content.ts
+index c944699..39c725e 100644
+--- a/src/server/content.ts
++++ b/src/server/content.ts
+@@ -5,7 +5,7 @@ import { starterSections } from "./starter-content";
+ 
+ const stringList = z.array(z.string()).catch([]);
+ 
+-export const DEFAULT_LOGO_URL = "/logo.svg";
++export const DEFAULT_LOGO_URL = "/logo.png";
+ 
+ export type BusinessSettings = {
+   businessName: string;
+diff --git a/src/server/starter-content.ts b/src/server/starter-content.ts
+index d0db122..9d9aaf0 100644
+--- a/src/server/starter-content.ts
++++ b/src/server/starter-content.ts
+@@ -54,7 +54,6 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
+     heading: "Our Services",
+     text: "Whatever lock or key you need help with, we bring the tools to you.",
+     cardLink: "Call for this service",
+-    button: "See all services in detail",
+   },
+   "home.fobHighlight": {
+     heading: "Need a New Key Fob? Get It Done Today",
+@@ -79,11 +78,6 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
+     heading: "Areas We Serve",
+     text: "We proudly serve {city} and the surrounding communities, including:",
+   },
+-  "services.intro": {
+-    heading: "Our Services",
+-    text: "We're a fully mobile locksmith, so every service below comes to you: at home, at work, or wherever your car is parked. Not sure what you need? Call us at {phone} and we'll help you figure it out.",
+-    jumpHeading: "Jump to a service",
+-  },
+   "about.intro": {
+     heading: "About Key Express",
+     text: [
+@@ -93,12 +87,6 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
+       "Call us any time, day or night. We'll answer your questions and send a technician your way.",
+     ].join("\n\n"),
+   },
+-  "faq.intro": {
+-    heading: "Frequently Asked Questions",
+-    text: "Here are answers to the questions we hear most. If you don't see yours, call us at {phone}.",
+-    closingHeading: "Still have a question?",
+-    closingText: "Call us any time. We're happy to help.",
+-  },
+   "contact.intro": {
+     heading: "Contact Us",
+     text: "The fastest way to get help is to call us at {phone}, any time of day or night. You can also send us a request below and we'll call you back.",
+@@ -326,24 +314,12 @@ export const starterSeo = [
+     description:
+       "Locked out or lost your keys? Key Express is a mobile locksmith serving {city} and nearby areas, 24/7. Car keys, key fobs, homes, and businesses. Call {phone}.",
+   },
+-  {
+-    path: "/services",
+-    title: "Locksmith Services | Key Express",
+-    description:
+-      "Car key cutting and programming, smart keys, key fobs, transponder keys, ignition repair, and home and business locks. We come to you in {city}.",
+-  },
+   {
+     path: "/about",
+     title: "About Us | Key Express",
+     description:
+       "Key Express is a fully mobile locksmith. We bring the tools to your driveway, home, or business, and we handle the jobs others turn down.",
+   },
+-  {
+-    path: "/faq",
+-    title: "Questions and Answers | Key Express",
+-    description:
+-      "How fast can we get to you? Do we work 24/7? Can we make a key if you lost them all? Answers to common locksmith questions.",
+-  },
+   {
+     path: "/contact",
+     title: "Contact Us | Key Express",
+diff --git a/src/server/uploads.ts b/src/server/uploads.ts
+index 1772765..eba7d3e 100644
+--- a/src/server/uploads.ts
++++ b/src/server/uploads.ts
+@@ -133,7 +133,7 @@ export async function readUpload(dataDir: string, name: string): Promise<{ data:
+ }
+ 
+ // Removes an uploaded file that's no longer used. Anything that isn't one of
+-// our uploads (like the default /logo.svg) is left alone.
++// our uploads (like the default /logo.png) is left alone.
+ export async function deleteUpload(dataDir: string, url: string | null | undefined): Promise<void> {
+   const name = url?.replace(/^\/uploads\//, "");
+   if (!name || !SAFE_NAME.test(name)) return;

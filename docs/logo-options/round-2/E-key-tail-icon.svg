@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-labelledby="keei-t">
+<title id="keei-t">Key Express</title>
+<path fill="#0b2545" d="M24 0H76C89.25 0 100 10.75 100 24V76C100 89.25 89.25 100 76 100H24C10.75 100 0 89.25 0 76V24C0 10.75 10.75 0 24 0Z"/>
+<path fill="#ffffff" d="M22.55 70.96V17.04H36.03V35.65L53.02 17.04H70.73L48.24 41.37L71.45 70.96H54.68L39.34 50.99L36.03 54.6V70.96Z"/>
+<path fill="#7fa8ff" d="M22 74H70L78 79.5V82H75.31L73.24 85H72.26L66.74 88H65.76L60.24 84.5H59.26L53.74 87H52.76L50.46 82H22Z"/>
+</svg>

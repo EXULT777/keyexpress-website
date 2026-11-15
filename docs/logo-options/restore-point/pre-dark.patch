@@ -1,0 +1,1642 @@
+diff --git a/e2e/admin.spec.ts b/e2e/admin.spec.ts
+index f39fe0f..2ba225b 100644
+--- a/e2e/admin.spec.ts
++++ b/e2e/admin.spec.ts
+@@ -62,7 +62,7 @@ test.describe("Admin panel", () => {
+     await page.getByRole("button", { name: "Use the original Key Express logo again" }).click();
+     await expect(page.getByText("Default logo restored ✓")).toBeVisible();
+     await page.goto("/");
+-    await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.svg");
++    await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.png");
+   });
+ 
+   test("a new Service can be added, hidden from the website, and deleted", async ({ page }) => {
+diff --git a/e2e/public-site.spec.ts b/e2e/public-site.spec.ts
+index 8d5a1e1..db6e01a 100644
+--- a/e2e/public-site.spec.ts
++++ b/e2e/public-site.spec.ts
+@@ -25,12 +25,11 @@ test.describe("the public website", () => {
+     }
+   });
+ 
+-  test("the big phone number is in the header at every desktop width", async ({ page }) => {
++  test("the phone number is in the header's Call button at every desktop width", async ({ page }) => {
+     for (const width of [1024, 1280]) {
+       await page.setViewportSize({ width, height: 900 });
+       await page.goto("/");
+-      await expect(page.locator("header").getByRole("link", { name: "(555) 014-7823", exact: true }).filter({ visible: true })).toHaveCount(1);
+-      await expect(page.locator("header").getByRole("link", { name: /Call Now/ })).toBeInViewport();
++      await expect(page.locator("header").getByRole("link", { name: "Call (555) 014-7823", exact: true })).toBeInViewport();
+     }
+   });
+ 
+@@ -43,7 +42,7 @@ test.describe("the public website", () => {
+ 
+     await page.setViewportSize({ width: 1280, height: 900 });
+     await expect(bar).toBeHidden();
+-    await expect(page.locator("header").getByRole("link", { name: /Call Now/ })).toBeVisible();
++    await expect(page.locator("header").getByRole("link", { name: "Call (555) 014-7823", exact: true })).toBeVisible();
+   });
+ 
+   test("the keyboard reaches the skip link first, and it jumps to the content", async ({ page }) => {
+diff --git a/public/logo.svg b/public/logo.svg
+deleted file mode 100644
+index 4475712..0000000
+--- a/public/logo.svg
++++ /dev/null
+@@ -1,14 +0,0 @@
+-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 327 64" width="327" height="64" role="img" aria-labelledby="t">
+-  <title id="t">Key Express</title>
+-  <defs>
+-    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e56c7"/><stop offset="1" stop-color="#0b2545"/></linearGradient>
+-    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c5ccd6"/></linearGradient>
+-  </defs>
+-  <rect width="64" height="64" rx="16" fill="url(#tile)"/>
+-  <g fill="none" stroke="url(#metal)" stroke-linecap="round" stroke-linejoin="round">
+-    <circle cx="22" cy="22" r="9" stroke-width="6"/>
+-    <path d="M28.5 28.5 49 49" stroke-width="6"/>
+-    <path d="M41 41l5-5M46 46l4-4" stroke-width="5"/>
+-  </g>
+-  <path fill="#0b2545" d="M85.62 44.50L79.84 44.50L79.84 21.79L85.62 21.79L85.62 30.36L93.44 21.79L100.47 21.79L91.43 31.58L100.81 44.50L94.15 44.50L87.72 35.56L85.62 37.87L85.62 44.50ZM122.34 44.50L104.49 44.50L104.49 21.79L122.20 21.79L122.20 26.89L110.27 26.89L110.27 30.29L117.34 30.29L117.34 35.35L110.27 35.35L110.27 39.40L122.34 39.40L122.34 44.50ZM139.51 44.50L133.73 44.50L133.73 35.59L125.00 21.79L131.76 21.79L136.59 30.12L141.45 21.79L148.25 21.79L139.51 35.59L139.51 44.50ZM182.16 44.50L164.31 44.50L164.31 21.79L182.02 21.79L182.02 26.89L170.09 26.89L170.09 30.29L177.16 30.29L177.16 35.35L170.09 35.35L170.09 39.40L182.16 39.40L182.16 44.50ZM192.09 44.50L185.15 44.50L193.48 32.84L185.63 21.79L192.53 21.79L196.92 27.98L201.34 21.79L208.24 21.79L200.39 32.84L208.72 44.50L201.78 44.50L196.92 37.67L192.09 44.50ZM218.17 44.50L212.39 44.50L212.39 21.79L222.83 21.79Q225.28 21.79 227.35 22.57Q229.43 23.35 230.68 25.02Q231.94 26.68 231.94 29.34L231.94 29.34Q231.94 31.99 230.68 33.67Q229.43 35.35 227.35 36.14Q225.28 36.92 222.83 36.92L222.83 36.92L218.17 36.92L218.17 44.50ZM218.17 26.68L218.17 32.02L222.73 32.02Q224.02 32.02 224.94 31.39Q225.86 30.76 225.86 29.34L225.86 29.34Q225.86 27.94 224.94 27.31Q224.02 26.68 222.73 26.68L222.73 26.68L218.17 26.68ZM241.67 44.50L235.89 44.50L235.89 21.79L246.63 21.79Q248.98 21.79 250.97 22.52Q252.96 23.25 254.16 24.83Q255.37 26.41 255.37 28.96L255.37 28.96Q255.37 31.75 253.91 33.38Q252.45 35.01 250.17 35.66L250.17 35.66L250.17 35.66L256.53 44.50L249.80 44.50L243.98 36.17L241.67 36.17L241.67 44.50ZM241.67 26.68L241.67 31.27L246.29 31.27Q247.18 31.27 247.84 31.04Q248.50 30.80 248.90 30.29Q249.29 29.78 249.29 28.96L249.29 28.96Q249.29 28.15 248.90 27.64Q248.50 27.13 247.84 26.90Q247.18 26.68 246.29 26.68L246.29 26.68L241.67 26.68ZM277.95 44.50L260.10 44.50L260.10 21.79L277.82 21.79L277.82 26.89L265.88 26.89L265.88 30.29L272.95 30.29L272.95 35.35L265.88 35.35L265.88 39.40L277.95 39.40L277.95 44.50ZM291.28 44.91L291.28 44.91Q288.70 44.91 286.69 44.21Q284.69 43.51 283.33 42.20Q281.97 40.90 281.25 39.09L281.25 39.09L286.52 37.19Q286.76 38.11 287.43 38.80Q288.09 39.50 289.11 39.89Q290.13 40.28 291.42 40.28L291.42 40.28Q292.37 40.28 293.22 40.08Q294.07 39.88 294.62 39.38Q295.16 38.89 295.16 38.01L295.16 38.01Q295.16 36.92 294.24 36.39Q293.32 35.86 291.42 35.52L291.42 35.52L288.73 35.01Q286.66 34.61 285.10 33.79Q283.53 32.97 282.67 31.66Q281.80 30.36 281.80 28.55L281.80 28.55Q281.80 26.65 282.67 25.31Q283.53 23.96 284.96 23.08Q286.39 22.20 288.12 21.79Q289.86 21.38 291.56 21.38L291.56 21.38Q293.43 21.38 295.18 21.89Q296.93 22.40 298.31 23.52Q299.68 24.64 300.40 26.45L300.40 26.45L295.19 28.35Q294.92 27.60 294.34 27.07Q293.77 26.55 292.93 26.28Q292.10 26.00 291.01 26.00L291.01 26.00Q289.96 26.00 289.18 26.24Q288.39 26.48 287.99 26.92Q287.58 27.36 287.58 28.01L287.58 28.01Q287.58 28.76 288.17 29.28Q288.77 29.81 290.03 30.05L290.03 30.05L293.05 30.66Q295.57 31.17 297.34 31.95Q299.10 32.74 300.02 33.99Q300.94 35.25 300.94 37.26L300.94 37.26Q300.94 39.71 299.58 41.42Q298.22 43.14 296.03 44.02Q293.83 44.91 291.28 44.91ZM313.80 44.91L313.80 44.91Q311.21 44.91 309.21 44.21Q307.20 43.51 305.84 42.20Q304.48 40.90 303.77 39.09L303.77 39.09L309.04 37.19Q309.27 38.11 309.94 38.80Q310.60 39.50 311.62 39.89Q312.64 40.28 313.93 40.28L313.93 40.28Q314.88 40.28 315.73 40.08Q316.58 39.88 317.13 39.38Q317.67 38.89 317.67 38.01L317.67 38.01Q317.67 36.92 316.75 36.39Q315.84 35.86 313.93 35.52L313.93 35.52L311.25 35.01Q309.17 34.61 307.61 33.79Q306.04 32.97 305.18 31.66Q304.31 30.36 304.31 28.55L304.31 28.55Q304.31 26.65 305.18 25.31Q306.04 23.96 307.47 23.08Q308.90 22.20 310.63 21.79Q312.37 21.38 314.07 21.38L314.07 21.38Q315.94 21.38 317.69 21.89Q319.44 22.40 320.82 23.52Q322.19 24.64 322.91 26.45L322.91 26.45L317.71 28.35Q317.43 27.60 316.86 27.07Q316.28 26.55 315.44 26.28Q314.61 26.00 313.52 26.00L313.52 26.00Q312.47 26.00 311.69 26.24Q310.91 26.48 310.50 26.92Q310.09 27.36 310.09 28.01L310.09 28.01Q310.09 28.76 310.69 29.28Q311.28 29.81 312.54 30.05L312.54 30.05L315.56 30.66Q318.08 31.17 319.85 31.95Q321.62 32.74 322.53 33.99Q323.45 35.25 323.45 37.26L323.45 37.26Q323.45 39.71 322.09 41.42Q320.73 43.14 318.54 44.02Q316.35 44.91 313.80 44.91Z"/>
+-</svg>
+diff --git a/scripts/check-contrast.mjs b/scripts/check-contrast.mjs
+index c019d49..5bc816b 100644
+--- a/scripts/check-contrast.mjs
++++ b/scripts/check-contrast.mjs
+@@ -1,15 +1,18 @@
+ // Checks every text/background color pair the site uses against WCAG AA:
+ // 4.5:1 for text, 3:1 for borders and focus outlines. Run: npm run check:contrast
+ const colors = {
+-  navy: "#0b2545",
+-  action: "#1e56c7",
+-  actionHover: "#16439e",
+-  silver: "#c5ccd6",
+-  silverSoft: "#e9edf2",
+-  silverLight: "#f3f5f8",
++  navy: "#0a1525",
++  navyDeep: "#060e1a",
++  navyRaised: "#13233a",
++  action: "#016af6",
++  actionHover: "#0157cc",
++  sky: "#027ef9",
++  silver: "#d5dde8",
++  silverSoft: "#e6ecf4",
++  silverLight: "#f7f9fc",
+   white: "#ffffff",
+-  ink: "#1a202c",
+-  inkSoft: "#3b4556",
++  ink: "#0e1726",
++  inkSoft: "#45526a",
+   emergency: "#c62828",
+   success: "#1e6b3a",
+   error: "#b3261e",
+@@ -19,29 +22,33 @@ const colors = {
+ // [foreground, background, what it is, minimum ratio]
+ const pairs = [
+   ["ink", "white", "body text", 4.5],
+-  ["ink", "silverLight", "body text on light silver sections", 4.5],
+-  ["ink", "silver", "body text on the bottom of the brushed-silver gradient", 4.5],
++  ["ink", "silverLight", "body text on light sections", 4.5],
+   ["inkSoft", "white", "hints and secondary text", 4.5],
+-  ["inkSoft", "silverLight", "hints on light silver", 4.5],
++  ["inkSoft", "silverLight", "hints on light sections", 4.5],
+   ["navy", "white", "headings", 4.5],
+-  ["navy", "silverLight", "headings on light silver", 4.5],
+-  ["navy", "silver", "headings on the brushed-silver gradient", 4.5],
+-  ["white", "navy", "header bar, footer and dark sections", 4.5],
+-  ["silverSoft", "navy", "secondary text on dark blue", 4.5],
++  ["navy", "silverLight", "headings on light sections", 4.5],
++  ["white", "navy", "header, top sections and dark bands", 4.5],
++  ["white", "navyDeep", "top bar and footer", 4.5],
++  ["silverSoft", "navy", "secondary text on midnight", 4.5],
++  ["silverSoft", "navyDeep", "secondary text in the footer", 4.5],
++  ["sky", "navy", "phone icons, hovers and the current menu item on midnight", 4.5],
++  ["sky", "navyDeep", "phone icons in the footer", 4.5],
++  ["sky", "navyRaised", "icons in the midnight icon chips (graphics need 3:1)", 3],
++  ["navy", "white", "call buttons", 4.5],
++  ["navy", "silverSoft", "call buttons on hover", 4.5],
+   ["white", "action", "blue buttons", 4.5],
+   ["white", "actionHover", "blue buttons on hover", 4.5],
+   ["action", "white", "links and outline buttons", 4.5],
+-  ["action", "silverLight", "links on light silver", 4.5],
+-  ["actionHover", "silver", "links on the brushed-silver gradient (globals.css)", 4.5],
++  ["action", "silverLight", "links on light sections", 4.5],
+   ["actionHover", "white", "links on hover", 4.5],
+-  ["navy", "silverSoft", "white-button hover on dark blue", 4.5],
++  ["navy", "silverSoft", "white-button hover on midnight", 4.5],
+   ["white", "emergency", "24/7 Emergency badge", 4.5],
+   ["success", "white", "Saved ✓ messages", 4.5],
+   ["success", "silverLight", "Shown status chips", 4.5],
+   ["error", "white", "error messages", 4.5],
+   ["error", "silverLight", "Hidden status chips", 4.5],
+   ["ink", "emergencyRow", "emergency requests in the inbox", 4.5],
+-  ["action", "emergencyRow", "links in emergency requests", 4.5],
++  ["actionHover", "emergencyRow", "links in the inbox, including emergency requests (inbox.tsx)", 4.5],
+   ["inkSoft", "white", "input borders", 3],
+   ["action", "white", "focus outline on light backgrounds", 3],
+   ["white", "navy", "focus outline on dark backgrounds", 3],
+diff --git a/src/app/(site)/contact/page.tsx b/src/app/(site)/contact/page.tsx
+index 210dda9..2ff1f0b 100644
+--- a/src/app/(site)/contact/page.tsx
++++ b/src/app/(site)/contact/page.tsx
+@@ -27,7 +27,7 @@ export default async function ContactPage() {
+       <LocalBusinessJsonLd settings={settings} services={services} />
+       <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
+         <p>
+-          <FilledText text={intro.text} placeholders={placeholders} />
++          <FilledText text={intro.text} placeholders={placeholders} tone="dark" />
+         </p>
+       </PageHeader>
+       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-12 sm:px-6 md:py-16 lg:grid-cols-[1fr_1.4fr]">
+@@ -37,7 +37,7 @@ export default async function ContactPage() {
+           </h2>
+           <div>
+             <p className="font-bold text-navy">Phone, any time</p>
+-            <PhoneNumberLink phone={settings.phone} className="mt-1 text-3xl text-navy hover:text-action md:text-4xl" />
++            <PhoneNumberLink phone={settings.phone} className="mt-1 text-3xl md:text-4xl" />
+           </div>
+           <p className="flex items-start gap-3">
+             <Mail aria-hidden="true" className="mt-1 size-6 shrink-0 text-action" />
+diff --git a/src/app/(site)/faq/page.tsx b/src/app/(site)/faq/page.tsx
+index 3f22206..173244d 100644
+--- a/src/app/(site)/faq/page.tsx
++++ b/src/app/(site)/faq/page.tsx
+@@ -23,7 +23,7 @@ export default async function FaqPage() {
+     <>
+       <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
+         <p>
+-          <FilledText text={intro.text} placeholders={placeholders} />
++          <FilledText text={intro.text} placeholders={placeholders} tone="dark" />
+         </p>
+       </PageHeader>
+       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16">
+diff --git a/src/app/(site)/page.tsx b/src/app/(site)/page.tsx
+index acde22b..2d4b899 100644
+--- a/src/app/(site)/page.tsx
++++ b/src/app/(site)/page.tsx
+@@ -42,29 +42,29 @@ export default async function HomePage() {
+     <>
+       <LocalBusinessJsonLd settings={settings} services={services} />
+       {hero.visible ? (
+-        <section aria-labelledby="hero-heading" className="bg-brushed">
++        <section aria-labelledby="hero-heading" className="on-dark bg-night text-white">
+           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1fr_auto]">
+             <div className="max-w-3xl">
+               <h1 id="hero-heading" className="text-[2rem] font-extrabold md:text-5xl">
+                 {fill(hero.content.heading)}
+               </h1>
+-              <p className="mt-5 text-xl md:text-[1.375rem]">
+-                <FilledText text={hero.content.text} placeholders={placeholders} />
++              <p className="mt-5 text-xl text-silver-soft md:text-[1.375rem]">
++                <FilledText text={hero.content.text} placeholders={placeholders} tone="dark" />
+               </p>
+               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                 <CallButton phone={settings.phone} label={fill(hero.content.callButton)} />
+-                <ButtonLink href={requestHref} variant="secondary">
++                <ButtonLink href={requestHref} variant="outlineLight">
+                   <ClipboardList aria-hidden="true" className="size-6 shrink-0" />
+                   {fill(hero.content.requestButton)}
+                 </ButtonLink>
+               </div>
+-              <p className="mt-8 text-lg">
++              <p className="mt-8 text-lg text-silver-soft">
+                 {fill(hero.content.phoneIntro)}
+                 <br />
+-                <PhoneNumberLink phone={settings.phone} className="mt-1 text-3xl text-navy hover:text-action-hover md:text-4xl" />
++                <PhoneNumberLink phone={settings.phone} tone="dark" className="mt-1 text-3xl md:text-4xl" />
+               </p>
+             </div>
+-            <KeyIllustration className="hidden size-64 drop-shadow-xl lg:block" />
++            <KeyIllustration className="hidden size-72 lg:block" />
+           </div>
+         </section>
+       ) : (
+@@ -75,7 +75,7 @@ export default async function HomePage() {
+         <Section labelledBy="emergency-heading">
+           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+             <div className="flex max-w-3xl gap-5">
+-              <span className="hidden size-16 shrink-0 items-center justify-center rounded-full bg-silver-light text-navy sm:flex">
++              <span className="hidden size-16 shrink-0 items-center justify-center rounded-2xl bg-navy text-sky shadow-lg sm:flex">
+                 <Siren aria-hidden="true" className="size-9" />
+               </span>
+               <div>
+@@ -94,7 +94,7 @@ export default async function HomePage() {
+         <Section labelledBy="business-heading" tone="silver">
+           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+             <div className="flex max-w-3xl gap-5">
+-              <span className="hidden size-16 shrink-0 items-center justify-center rounded-full bg-white text-navy sm:flex">
++              <span className="hidden size-16 shrink-0 items-center justify-center rounded-2xl bg-navy text-sky shadow-lg sm:flex">
+                 <Building2 aria-hidden="true" className="size-9" />
+               </span>
+               <div>
+@@ -166,7 +166,7 @@ export default async function HomePage() {
+         <Section labelledBy="fob-heading" tone="silver">
+           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+             <div className="flex max-w-3xl gap-5">
+-              <span className="hidden size-16 shrink-0 items-center justify-center rounded-full bg-white text-navy sm:flex">
++              <span className="hidden size-16 shrink-0 items-center justify-center rounded-2xl bg-navy text-sky shadow-lg sm:flex">
+                 <Smartphone aria-hidden="true" className="size-9" />
+               </span>
+               <div>
+@@ -190,12 +190,7 @@ export default async function HomePage() {
+                 <FilledText text={businessAccounts.content.text} placeholders={placeholders} tone="dark" />
+               </p>
+             </div>
+-            <CallButton
+-              phone={settings.phone}
+-              label={fill(businessAccounts.content.button)}
+-              variant="light"
+-              className="shrink-0"
+-            />
++            <CallButton phone={settings.phone} label={fill(businessAccounts.content.button)} className="shrink-0" />
+           </div>
+         </Section>
+       )}
+@@ -234,7 +229,7 @@ export default async function HomePage() {
+           </p>
+           <ul className="mt-8 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 md:grid-cols-4">
+             {settings.towns.map((town) => (
+-              <li key={town} className="flex items-center gap-3 rounded-xl bg-silver-light px-4 py-3 font-bold text-navy">
++              <li key={town} className="flex items-center gap-3 rounded-xl border border-silver bg-silver-light px-4 py-3 font-bold text-navy">
+                 <MapPin aria-hidden="true" className="size-6 shrink-0 text-action" />
+                 {town}
+               </li>
+diff --git a/src/app/(site)/services/page.tsx b/src/app/(site)/services/page.tsx
+index 7f0d78d..df234bf 100644
+--- a/src/app/(site)/services/page.tsx
++++ b/src/app/(site)/services/page.tsx
+@@ -25,7 +25,7 @@ export default async function ServicesPage() {
+     <>
+       <PageHeader title={fillPlaceholders(intro.heading, placeholders)}>
+         <p>
+-          <FilledText text={intro.text} placeholders={placeholders} />
++          <FilledText text={intro.text} placeholders={placeholders} tone="dark" />
+         </p>
+       </PageHeader>
+ 
+@@ -61,7 +61,7 @@ export default async function ServicesPage() {
+           >
+             <div className="max-w-3xl">
+               <div className="flex items-center gap-4">
+-                <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-silver-light text-action">
++                <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-navy text-sky shadow-lg">
+                   <NamedIcon name={service.icon} aria-hidden="true" className="size-9" />
+                 </span>
+                 <h2 id={`${service.slug}-heading`} className="text-[1.75rem] md:text-4xl">
+diff --git a/src/app/admin/(panel)/requests/inbox.tsx b/src/app/admin/(panel)/requests/inbox.tsx
+index ca28c98..0115bf4 100644
+--- a/src/app/admin/(panel)/requests/inbox.tsx
++++ b/src/app/admin/(panel)/requests/inbox.tsx
+@@ -132,7 +132,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
+                     <PhoneLink phone={request.phone} />
+                     {request.email && (
+                       <p className="break-all">
+-                        <a href={`mailto:${request.email}`} className="text-action underline">
++                        <a href={`mailto:${request.email}`} className="text-action-hover underline">
+                           {request.email}
+                         </a>
+                       </p>
+@@ -180,7 +180,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
+                     <div>
+                       <dt className="font-bold text-navy">Email</dt>
+                       <dd className="break-all">
+-                        <a href={`mailto:${request.email}`} className="text-action underline">
++                        <a href={`mailto:${request.email}`} className="text-action-hover underline">
+                           {request.email}
+                         </a>
+                       </dd>
+@@ -240,7 +240,7 @@ function EmergencyFlag() {
+ 
+ function PhoneLink({ phone }: { phone: string }) {
+   return (
+-    <a href={telHref(phone)} className="inline-flex items-center gap-2 font-bold whitespace-nowrap text-action underline">
++    <a href={telHref(phone)} className="inline-flex items-center gap-2 font-bold whitespace-nowrap text-action-hover underline">
+       <Phone aria-hidden="true" className="size-5" />
+       {phone}
+     </a>
+diff --git a/src/app/admin/login/page.tsx b/src/app/admin/login/page.tsx
+index 439b613..def6c63 100644
+--- a/src/app/admin/login/page.tsx
++++ b/src/app/admin/login/page.tsx
+@@ -18,7 +18,10 @@ export default async function AdminLoginPage() {
+   return (
+     <main id="main" className="flex min-h-screen items-start justify-center bg-silver-light px-4 py-12 md:items-center">
+       <div className="w-full max-w-lg rounded-2xl border-2 border-silver bg-white p-6 md:p-10">
+-        <Logo src={settings.logoUrl} name={settings.businessName} />
++        {/* The default logo is silver and blue for dark backgrounds, so it gets a navy plate here. */}
++        <div className={settings.hasCustomLogo ? "" : "inline-block rounded-xl bg-navy px-4 py-3"}>
++          <Logo src={settings.logoUrl} name={settings.businessName} />
++        </div>
+         <h1 className="mt-8 text-[2rem] font-extrabold">Admin login</h1>
+         {adminCount === 0 ? (
+           <div role="alert" className="mt-6 rounded-xl border-4 border-error p-5">
+diff --git a/src/app/apple-icon.png b/src/app/apple-icon.png
+index 07b9da5d22db4122c07d0e27e63f060b16277894..41051fafbbed04252cd59e7d49ab40966dac9597 100644
+GIT binary patch
+literal 18961
+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
+atp5+kkCJt2^n_&q0000<MNUMnLSTYoN3XvC
+
+literal 7721
+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
+N!qn!%`|~LL{{Ww+4IKag
+
+diff --git a/src/app/favicon.ico b/src/app/favicon.ico
+index 6043a48fe200d9e487fe810ef8060c3f00d29e4d..65ccc82bac95ede657a95802ff2351394c67b98d 100644
+GIT binary patch
+literal 15086
+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
+
+literal 1288
+zcmV+j1^4;@0096203aX$0096X0P+L?02TlM0EtjeM-2)Z3IG5A4M|8uQUCw|AOHXW
+zAP5Ek0047(dh`GQ010qNS#tmYE+YT{E+YYWr9XB600g8-L_t(og}vANPm@;|2k`fo
+zxnH=ov=nGf_5*BMU~@wS0YQ)r9NG(;Gt06}vc$1VWWx&vP#6;wWC%!rz`Sf7Gs>Jp
+zw@xewnPFUlatEmbv)oE4EtKkTGQP`slXgg7NY(=9ANZVep6_!`9*SD91Y(7cKyovW
+zFRAPlNaRMo_*d{n*TEN6z<t+MxbM6I_o#BXM_q#3n-}4><9oP8eh1fx3vi7%2iG^g
+z0q^w^@WPA13onFASb>onme<J*J)O%7$@QidTON_}=LOQLLV-l_k3d=pf#f&Xiu1M?
+zz$GjnE}^+_3C#gF<kT!DB(s1LrmV5R*Gj8z38V_F7``nV+>k7AgHM7RoL>FRCIr#d
+zMXQHrfV1^DI6-M==GA-!ubmkOCm>~(6`1Trk-#m6zaYJe<l?(%>`-G|Z^W3^fZApi
+z4xGM?wNc+%j|Zm0Ip7$aw<P6Id}(DD6YjfLj?O+Eo;>**kN%p0!T1>ZDI>JHDX7Qw
+zsA=kl&pR^f@qlDF`zLl#0<nCW>Euh{!|DmBM#fQD*9(3`k#+c%M6mph7$~NilWRBO
+zTD=hmbL;S8bQwIOW%wey27RhA3=FFA;Lj1nrpv9u+5Shs_B#xUDR51lW9E|+d|}|?
+zvJ^CauWtzDH(IU6*?tGf1}xLA(HYIxPENis?VjRN8t+m*L_^Dct8w<`cu-8OHmaR6
+z*PLAY!nAveN@%>jX8?80y;kF_O`n5e>hsz=Ds$jS%@?-Xp`4pg_79<@vk$V0Myqkw
+z#{Hm}9vRZ-rnHm5?ax%u*X|)Iq4B3rXF--mJBgU1KU$5mHhxAnVEMw4M~3t{X*E;Y
+zO*L2c57YSE+#J0T*|iq%ww<sFck=xN)MC#od1OeR&&Ns4$+c@HCTV<zwCdv-oW0Tn
+zm*B7dH}3RWEU2a4cJj!?9+%_tjaD?aKA;0fY94d69Or&&rg2lZlwPg}Hz>u7`-o4#
+zdsq6BxYMiqKw0~-xP)Y&=u!iXPv{MF9tto14sKu)_QaouZqf*~Mh9V3>Y}*gh7Up6
+z@~d&TrlH`6+cZ9^(P3y*i;C(tOd5>z#s){USij@gqPXLR7_tEyzSO`}Z~{}1C#$7#
+z(mA9oWCKHLEyN!eU|nPqUW!O$#2sJx0F=#NYCtkL0ZGU{UqzpK%J2vptsZ69{(vYp
+zA8kDYXlhl$GyISR?)dWiplroWX?ONdfb8dbjHoA|92iEoQiU$13T@r}sB7+qM_9ZC
+z?%?wtsO7*-t>)}^02#%<ptJWO?)44QZQIz=i-^4^8F2@ncgY5p2RF5v^X53@U8tn-
+z=Jxxjzte++tTIO2!FvxV-u5$w<-$#AXK(rxr%JD*;cgFo{kQ7c7;!tVx2Gs>Xnxmn
+z;-<8-eLuqC%rew8v?K1zvlh6$*KXJg-|C>q#IoEtQ`#AD*sYg-O_6blOf0L7+Y2SL
+zc0!Smo(;&jw7R$ycI(7>|IKE?lr@~-jH*?{6_oG3=boKT$tHr*&X9>^MX#Nl+ybAs
+y$hbr%7BV!j{1T>Z#qGRyPm{Ehz?o}4Z~Y79NeoW@L+*Y60000<MNUMnLSTZ`6Ls<c
+
+diff --git a/src/app/globals.css b/src/app/globals.css
+index c825112..e95cf05 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -1,17 +1,28 @@
+ @import "tailwindcss";
+ 
+-/* Key Express colors. Every text/background pair used on the site meets WCAG AA
+-   (4.5:1); scripts/check-contrast.mjs checks them. Red is only for the
+-   24/7 Emergency badge. */
++/* Key Express colors, built around the chrome-and-electric-blue logo:
++   - navy: deep midnight for the header, top sections and footer, where the
++     logo is meant to sit (the old names are kept so every class still works).
++   - action and sky are the logo's own blue, which runs from #0488fe at the top
++     of its letters to #016af6 at the bottom. action is the deep end (#016af6),
++     where white text stays readable; sky is the logo's main tone (#027ef9),
++     for text and icons on midnight.
++   - call buttons are white with navy text and a soft blue pulse (buttons.tsx).
++   - silver tokens: cool light surfaces and borders.
++   Every text/background pair meets WCAG AA (4.5:1); scripts/check-contrast.mjs
++   checks them. Red is only for the 24/7 Emergency badge. */
+ @theme {
+-  --color-navy: #0b2545;
+-  --color-action: #1e56c7;
+-  --color-action-hover: #16439e;
+-  --color-silver: #c5ccd6;
+-  --color-silver-soft: #e9edf2;
+-  --color-silver-light: #f3f5f8;
+-  --color-ink: #1a202c;
+-  --color-ink-soft: #3b4556;
++  --color-navy: #0a1525;
++  --color-navy-deep: #060e1a;
++  --color-navy-raised: #13233a;
++  --color-action: #016af6;
++  --color-action-hover: #0157cc;
++  --color-sky: #027ef9;
++  --color-silver: #d5dde8;
++  --color-silver-soft: #e6ecf4;
++  --color-silver-light: #f7f9fc;
++  --color-ink: #0e1726;
++  --color-ink-soft: #45526a;
+   --color-emergency: #c62828;
+   --color-success: #1e6b3a;
+   --color-error: #b3261e;
+@@ -74,14 +85,6 @@
+   }
+ }
+ 
+-@layer components {
+-  /* The bottom of the brushed-silver gradient is too dark for #1e56c7 text
+-     (4.0:1), so links there use the darker blue (5.6:1). */
+-  .bg-brushed .text-action {
+-    color: var(--color-action-hover);
+-  }
+-}
+-
+ /* Admin-written Markdown (the Privacy Policy and its preview). */
+ @layer components {
+   .policy > * + * {
+@@ -132,8 +135,74 @@
+   }
+ }
+ 
+-@utility bg-brushed {
+-  background-image: linear-gradient(180deg, #e9edf2 0%, #c5ccd6 100%);
++/* Button motion, as on the Speedster site: a light sweeps across on hover or
++   keyboard focus, the button presses in when tapped, and call buttons can send
++   out a soft pulsing ring. The reduced-motion rule at the end of this file turns
++   all of it off. */
++@layer components {
++  .btn-motion {
++    position: relative;
++    isolation: isolate;
++    overflow: hidden;
++    transition:
++      background-color 0.2s,
++      color 0.2s,
++      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
++  }
++
++  .btn-motion::after {
++    content: "";
++    position: absolute;
++    inset: 0;
++    z-index: -1;
++    background: linear-gradient(105deg, transparent 30%, var(--shine, rgb(255 255 255 / 0.38)) 48%, transparent 66%);
++    transform: translateX(-130%);
++    transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
++    pointer-events: none;
++  }
++
++  .btn-motion:hover::after,
++  .btn-motion:focus-visible::after {
++    transform: translateX(130%);
++  }
++
++  .btn-motion:active {
++    transform: translateY(1px) scale(0.97);
++  }
++
++  .btn-pulse {
++    animation: call-pulse 2.6s ease-out infinite;
++  }
++}
++
++@keyframes call-pulse {
++  0% {
++    box-shadow: 0 0 0 0 var(--pulse, rgb(2 126 249 / 0.5));
++  }
++  70%,
++  100% {
++    /* Fade out in the ring's own color, so it doesn't turn grey on midnight. */
++    box-shadow: 0 0 0 14px var(--pulse-end, rgb(2 126 249 / 0));
++  }
++}
++
++/* Midnight with a soft electric-blue glow and a faint dot grid, for the top of
++   each page and the dark bands. Pair it with on-dark and white text. */
++@utility bg-night {
++  background-color: var(--color-navy);
++  background-image:
++    radial-gradient(56rem 28rem at 88% 8%, rgb(2 126 249 / 0.3), transparent 62%),
++    radial-gradient(40rem 22rem at 0% 110%, rgb(2 126 249 / 0.14), transparent 60%),
++    radial-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1.5px);
++  background-size:
++    auto,
++    auto,
++    22px 22px;
++}
++
++/* The thin line along the top of cards: the logo lettering's own blue gradient. */
++@utility bg-electric {
++  background-image: linear-gradient(90deg, #016af6 0%, #0488fe 100%);
+ }
+ 
+ @media (prefers-reduced-motion: no-preference) {
+diff --git a/src/app/icon.svg b/src/app/icon.svg
+deleted file mode 100644
+index d85b517..0000000
+--- a/src/app/icon.svg
++++ /dev/null
+@@ -1,12 +0,0 @@
+-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+-  <defs>
+-    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e56c7"/><stop offset="1" stop-color="#0b2545"/></linearGradient>
+-    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c5ccd6"/></linearGradient>
+-  </defs>
+-  <rect width="64" height="64" rx="16" fill="url(#tile)"/>
+-  <g fill="none" stroke="url(#metal)" stroke-linecap="round" stroke-linejoin="round">
+-    <circle cx="22" cy="22" r="9" stroke-width="6"/>
+-    <path d="M28.5 28.5 49 49" stroke-width="6"/>
+-    <path d="M41 41l5-5M46 46l4-4" stroke-width="5"/>
+-  </g>
+-</svg>
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index f3f9cc3..63f6d0f 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
+ }
+ 
+ export const viewport: Viewport = {
+-  themeColor: "#0b2545",
++  themeColor: "#0a1525",
+ };
+ 
+ export default function RootLayout({ children }: LayoutProps<"/">) {
+diff --git a/src/app/not-found.tsx b/src/app/not-found.tsx
+index ec4b316..f347f7c 100644
+--- a/src/app/not-found.tsx
++++ b/src/app/not-found.tsx
+@@ -17,11 +17,11 @@ export default async function NotFound() {
+ 
+   return (
+     <SiteChrome>
+-      <div className="bg-brushed">
++      <div className="on-dark bg-night text-white">
+         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 md:py-24">
+           <h1 className="text-[2rem] font-extrabold md:text-5xl">{fillPlaceholders(content.heading, placeholders)}</h1>
+-          <p className="mt-5 text-xl">
+-            <FilledText text={content.text} placeholders={placeholders} />
++          <p className="mt-5 text-xl text-silver-soft">
++            <FilledText text={content.text} placeholders={placeholders} tone="dark" />
+           </p>
+           <div className="mt-8">
+             <ButtonLink href="/" className="w-full sm:w-auto">
+@@ -30,7 +30,7 @@ export default async function NotFound() {
+             </ButtonLink>
+           </div>
+           <p className="mt-8">
+-            <PhoneNumberLink phone={settings.phone} className="text-3xl text-navy hover:text-action-hover" />
++            <PhoneNumberLink phone={settings.phone} tone="dark" className="text-3xl" />
+           </p>
+         </div>
+       </div>
+diff --git a/src/app/og-image/route.tsx b/src/app/og-image/route.tsx
+index a153128..8b3e2e9 100644
+--- a/src/app/og-image/route.tsx
++++ b/src/app/og-image/route.tsx
+@@ -9,11 +9,13 @@ import { db } from "@/server/db";
+ export const dynamic = "force-dynamic";
+ 
+ export async function GET() {
+-  const [settings, font] = await Promise.all([
++  const [settings, font, logoFile] = await Promise.all([
+     getBusinessSettings(db),
+     // The site's font; the image renderer needs it as TTF rather than WOFF2.
+     readFile(path.join(process.cwd(), "src/fonts/atkinson-hyperlegible-next-extrabold.ttf")),
++    readFile(path.join(process.cwd(), "public/logo.png")),
+   ]);
++  const logo = `data:image/png;base64,${logoFile.toString("base64")}`;
+   return new ImageResponse(
+     (
+       <div
+@@ -24,24 +26,16 @@ export async function GET() {
+           flexDirection: "column",
+           justifyContent: "center",
+           padding: "80px",
+-          background: "linear-gradient(135deg, #0b2545 0%, #16439e 100%)",
++          background: "radial-gradient(circle at 85% 10%, #0f3f86 0%, #0a1525 60%)",
+           color: "#ffffff",
+           fontFamily: "Atkinson Hyperlegible Next",
+         }}
+       >
+-        <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
+-          <svg width="120" height="120" viewBox="0 0 64 64">
+-            <rect width="64" height="64" rx="16" fill="#e9edf2" />
+-            <g fill="none" stroke="#0b2545" strokeLinecap="round" strokeLinejoin="round">
+-              <circle cx="22" cy="22" r="9" strokeWidth="6" />
+-              <path d="M28.5 28.5 49 49" strokeWidth="6" />
+-              <path d="M41 41l5-5M46 46l4-4" strokeWidth="5" />
+-            </g>
+-          </svg>
+-          <div style={{ fontSize: 84, fontWeight: 700, letterSpacing: "2px" }}>{settings.businessName.toUpperCase()}</div>
+-        </div>
++        {/* The default logo, made for dark backgrounds (585×168). */}
++        {/* eslint-disable-next-line @next/next/no-img-element */}
++        <img src={logo} alt="" width={522} height={150} />
+         <div style={{ marginTop: "48px", fontSize: 52, fontWeight: 700 }}>24/7 Mobile Locksmith</div>
+-        <div style={{ marginTop: "16px", fontSize: 36, color: "#e9edf2" }}>
++        <div style={{ marginTop: "16px", fontSize: 36, color: "#e6ecf4" }}>
+           {`Cars, homes, and businesses in ${settings.serviceAreaCity} and nearby areas`}
+         </div>
+         <div style={{ marginTop: "48px", fontSize: 56, fontWeight: 700 }}>{settings.phone}</div>
+diff --git a/src/components/site/blocks.tsx b/src/components/site/blocks.tsx
+index ec60395..d8c224c 100644
+--- a/src/components/site/blocks.tsx
++++ b/src/components/site/blocks.tsx
+@@ -17,9 +17,9 @@ export function WhyChooseUsBadges({
+       {badges.map((badge) => (
+         <li
+           key={badge.title}
+-          className="flex flex-col items-center rounded-2xl border-2 border-silver bg-white px-3 py-6 text-center last:odd:col-span-2 lg:last:odd:col-span-1"
++          className="flex flex-col items-center rounded-2xl border border-silver bg-white px-3 py-6 text-center shadow-[0_14px_34px_-22px_rgb(10_21_37/0.45)] last:odd:col-span-2 lg:last:odd:col-span-1"
+         >
+-          <span className="flex size-16 items-center justify-center rounded-full bg-action text-white">
++          <span className="flex size-16 items-center justify-center rounded-2xl bg-navy text-sky shadow-lg">
+             <NamedIcon name={badge.icon} aria-hidden="true" className="size-8" />
+           </span>
+           <h3 className="mt-4 text-lg md:text-xl">{fillPlaceholders(badge.title, placeholders)}</h3>
+@@ -44,8 +44,8 @@ export function ServiceCard({
+   placeholders: PlaceholderValues;
+ }) {
+   return (
+-    <li className="flex flex-col overflow-hidden rounded-2xl border-2 border-silver bg-white">
+-      <div className="bg-brushed h-2" />
++    <li className="flex flex-col overflow-hidden rounded-2xl border border-silver bg-white shadow-[0_14px_34px_-22px_rgb(10_21_37/0.45)]">
++      <div className="bg-electric h-1.5" />
+       <div className="flex flex-1 flex-col p-6">
+         <NamedIcon name={service.icon} aria-hidden="true" className="size-10 text-action" />
+         <h3 className="mt-4 text-xl">{service.title}</h3>
+@@ -68,7 +68,7 @@ export function FaqList({ faqs, placeholders, className }: { faqs: Faq[]; placeh
+   return (
+     <div className={className}>
+       {faqs.map((item) => (
+-        <details key={item.id} className="group mb-4 rounded-2xl border-2 border-silver bg-white last:mb-0">
++        <details key={item.id} className="group mb-4 rounded-2xl border border-silver bg-white shadow-[0_10px_28px_-22px_rgb(10_21_37/0.4)] last:mb-0">
+           <summary className="flex min-h-16 items-center justify-between gap-4 rounded-2xl p-5 text-xl font-bold text-navy hover:bg-silver-light">
+             {fillPlaceholders(item.question, placeholders)}
+             <ChevronDown aria-hidden="true" className="size-7 shrink-0 transition-transform group-open:rotate-180" />
+diff --git a/src/components/site/buttons.tsx b/src/components/site/buttons.tsx
+index 4f41d7d..7e2adad 100644
+--- a/src/components/site/buttons.tsx
++++ b/src/components/site/buttons.tsx
+@@ -5,14 +5,20 @@ import { cn } from "@/lib/cn";
+ import { telHref } from "@/lib/phone";
+ 
+ const base =
+-  "inline-flex min-h-14 items-center justify-center gap-3 rounded-xl px-6 py-3 text-center text-lg font-bold no-underline transition-colors";
++  "btn-motion inline-flex min-h-14 items-center justify-center gap-3 rounded-xl px-6 py-3 text-center text-lg font-bold no-underline";
+ 
++// --shine is the light that sweeps across on hover, --pulse the ring a call button sends out.
+ const variants = {
+-  // Blue button for white and silver backgrounds.
+-  primary: "bg-action text-white hover:bg-action-hover",
+-  secondary: "border-2 border-action bg-white text-action hover:bg-silver-light hover:text-action-hover",
+-  // White button for dark blue backgrounds.
+-  light: "bg-white text-navy hover:bg-silver-soft",
++  // White, for calling. The border and shadow keep it a button on white sections too.
++  call: "border border-silver bg-white text-navy shadow-[0_8px_24px_-12px_rgb(10_21_37/0.45)] hover:bg-silver-soft [--shine:rgb(1_106_246/0.14)]",
++  // Blue button for white and light backgrounds.
++  primary: "bg-action text-white shadow-[0_8px_24px_-12px_rgb(1_106_246/0.8)] hover:bg-action-hover",
++  secondary:
++    "border-2 border-action bg-white text-action hover:bg-silver-light hover:text-action-hover [--shine:rgb(1_106_246/0.14)]",
++  // White button for midnight backgrounds.
++  light: "bg-white text-navy hover:bg-silver-soft [--pulse:rgb(255_255_255/0.6)] [--pulse-end:rgb(255_255_255/0)] [--shine:rgb(1_106_246/0.14)]",
++  // Outlined button for midnight backgrounds.
++  outlineLight: "border-2 border-white/60 text-white hover:border-white hover:bg-white/10",
+ };
+ 
+ export type ButtonVariant = keyof typeof variants;
+@@ -46,33 +52,56 @@ export function ButtonLink({
+   );
+ }
+ 
++// `withNumber` shows "Call (555) 014-7823" in one button; `pulse` adds the ring.
+ export function CallButton({
+   phone,
+   label = "Call Now",
+-  variant = "primary",
++  variant = "call",
+   className,
++  withNumber = false,
++  pulse = false,
+ }: {
+   phone: string;
+   label?: string;
+   variant?: ButtonVariant;
+   className?: string;
++  withNumber?: boolean;
++  pulse?: boolean;
+ }) {
+   return (
+-    <a href={telHref(phone)} className={buttonClasses(variant, className)}>
++    <a href={telHref(phone)} className={buttonClasses(variant, cn(pulse && "btn-pulse", "whitespace-nowrap", className))}>
+       <Phone aria-hidden="true" className="size-6 shrink-0" strokeWidth={2.25} />
+-      <span>
+-        {label}
+-        <span className="sr-only"> at {phone}</span>
+-      </span>
++      {withNumber ? (
++        <span>Call {phone}</span>
++      ) : (
++        <span>
++          {label}
++          <span className="sr-only"> at {phone}</span>
++        </span>
++      )}
+     </a>
+   );
+ }
+ 
+ // The phone number as large, tappable text.
+-export function PhoneNumberLink({ phone, className }: { phone: string; className?: string }) {
++// Bold, no underline, with a colored phone icon; the color changes on hover.
++export function PhoneNumberLink({
++  phone,
++  className,
++  tone = "light",
++}: {
++  phone: string;
++  className?: string;
++  tone?: "light" | "dark";
++}) {
++  const colors =
++    tone === "dark" ? { link: "text-white hover:text-sky", icon: "text-sky" } : { link: "text-navy hover:text-action-hover", icon: "text-action" };
+   return (
+-    <a href={telHref(phone)} className={cn("inline-flex items-center gap-2 font-bold whitespace-nowrap", className)}>
+-      <Phone aria-hidden="true" className="size-[1em] shrink-0" strokeWidth={2.5} />
++    <a
++      href={telHref(phone)}
++      className={cn("inline-flex items-center gap-2 font-bold whitespace-nowrap transition-colors", colors.link, className)}
++    >
++      <Phone aria-hidden="true" className={cn("size-[1em] shrink-0", colors.icon)} strokeWidth={2.5} />
+       {phone}
+     </a>
+   );
+diff --git a/src/components/site/key-illustration.tsx b/src/components/site/key-illustration.tsx
+index 8b18e13..871a13f 100644
+--- a/src/components/site/key-illustration.tsx
++++ b/src/components/site/key-illustration.tsx
+@@ -1,23 +1,15 @@
+-// A large silver key on a blue tile, the same mark as the default logo. Decorative.
++// The key ring and K from the logo, shown large with a soft electric glow on the
++// dark top section. Decorative.
+ export function KeyIllustration({ className }: { className?: string }) {
+   return (
+-    <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false" className={className}>
+-      <defs>
+-        <linearGradient id="key-illustration-tile" x1="0" y1="0" x2="1" y2="1">
+-          <stop offset="0" stopColor="#1e56c7" />
+-          <stop offset="1" stopColor="#0b2545" />
+-        </linearGradient>
+-        <linearGradient id="key-illustration-metal" x1="0" y1="0" x2="1" y2="1">
+-          <stop offset="0" stopColor="#ffffff" />
+-          <stop offset="1" stopColor="#c5ccd6" />
+-        </linearGradient>
+-      </defs>
+-      <rect width="64" height="64" rx="16" fill="url(#key-illustration-tile)" />
+-      <g fill="none" stroke="url(#key-illustration-metal)" strokeLinecap="round" strokeLinejoin="round">
+-        <circle cx="22" cy="22" r="9" strokeWidth="6" />
+-        <path d="M28.5 28.5 49 49" strokeWidth="6" />
+-        <path d="M41 41l5-5M46 46l4-4" strokeWidth="5" />
+-      </g>
+-    </svg>
++    // eslint-disable-next-line @next/next/no-img-element
++    <img
++      src="/logo-mark.png"
++      alt=""
++      aria-hidden="true"
++      width={267}
++      height={267}
++      className={`drop-shadow-[0_0_48px_rgb(2_126_249/0.55)] ${className ?? ""}`}
++    />
+   );
+ }
+diff --git a/src/components/site/logo.tsx b/src/components/site/logo.tsx
+index a7936df..6caac5f 100644
+--- a/src/components/site/logo.tsx
++++ b/src/components/site/logo.tsx
+@@ -1,10 +1,28 @@
+ import { cn } from "@/lib/cn";
+ 
++const HEIGHTS = { normal: { px: 48, className: "h-12" }, large: { px: 64, className: "h-16" } };
++
+ // A plain <img>: the logo may be an SVG or an uploaded image of any shape, so it
+ // keeps a fixed height and its own width. next/image doesn't resize SVGs anyway.
+-export function Logo({ src, name, className }: { src: string; name: string; className?: string }) {
++export function Logo({
++  src,
++  name,
++  className,
++  size = "normal",
++}: {
++  src: string;
++  name: string;
++  className?: string;
++  size?: keyof typeof HEIGHTS;
++}) {
++  const height = HEIGHTS[size];
+   return (
+     // eslint-disable-next-line @next/next/no-img-element
+-    <img src={src} alt={name} height={48} className={cn("h-12 w-auto max-w-full object-contain object-left", className)} />
++    <img
++      src={src}
++      alt={name}
++      height={height.px}
++      className={cn(height.className, "w-auto max-w-full object-contain object-left", className)}
++    />
+   );
+ }
+diff --git a/src/components/site/nav-links.tsx b/src/components/site/nav-links.tsx
+index d190646..aca3c03 100644
+--- a/src/components/site/nav-links.tsx
++++ b/src/components/site/nav-links.tsx
+@@ -7,7 +7,7 @@ import { mainNav } from "@/lib/navigation";
+ 
+ const tones = {
+   // On the dark blue header bar.
+-  dark: { current: "text-white underline decoration-[3px]", other: "text-white hover:underline" },
++  dark: { current: "text-white underline decoration-sky decoration-[3px]", other: "text-white hover:text-sky" },
+   // In the white drop-down menu on phones.
+   light: { current: "text-action underline decoration-[3px]", other: "text-navy hover:text-action hover:underline" },
+ };
+diff --git a/src/components/site/section.tsx b/src/components/site/section.tsx
+index f867995..e7d9e9d 100644
+--- a/src/components/site/section.tsx
++++ b/src/components/site/section.tsx
+@@ -4,8 +4,7 @@ import { cn } from "@/lib/cn";
+ const tones = {
+   white: "bg-white",
+   silver: "bg-silver-light",
+-  brushed: "bg-brushed",
+-  navy: "on-dark bg-navy text-white",
++  navy: "on-dark bg-night text-white",
+ };
+ 
+ export function Section({
+diff --git a/src/components/site/site-chrome.tsx b/src/components/site/site-chrome.tsx
+index e232d74..33e15fd 100644
+--- a/src/components/site/site-chrome.tsx
++++ b/src/components/site/site-chrome.tsx
+@@ -21,7 +21,7 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
+         {children}
+       </main>
+       {/* Room below the footer so the sticky call bar never covers the end of the page. */}
+-      <div className="bg-navy pb-28 lg:pb-0">
++      <div className="bg-navy-deep pb-28 lg:pb-0">
+         <SiteFooter settings={settings} />
+       </div>
+       <StickyCallBar phone={settings.phone} homeHasRequestForm={sections["home.request"].visible} />
+@@ -31,10 +31,10 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
+ 
+ export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
+   return (
+-    <div className="bg-brushed">
++    <div className="on-dark bg-night text-white">
+       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-16">
+         <h1 className="text-[2rem] font-extrabold md:text-5xl">{title}</h1>
+-        {children && <div className="mt-4 max-w-3xl text-xl">{children}</div>}
++        {children && <div className="mt-4 max-w-3xl text-xl text-silver-soft">{children}</div>}
+       </div>
+     </div>
+   );
+diff --git a/src/components/site/site-footer.tsx b/src/components/site/site-footer.tsx
+index 132a6e2..dbed0c0 100644
+--- a/src/components/site/site-footer.tsx
++++ b/src/components/site/site-footer.tsx
+@@ -16,13 +16,17 @@ function paymentIcon(method: string) {
+ 
+ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+   return (
+-    <footer className="on-dark bg-navy text-white">
++    <footer className="on-dark border-t border-white/10 bg-navy-deep text-white">
+       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+         <div className="space-y-4">
+-          {/* A white plate keeps any uploaded logo readable on dark blue. */}
+-          <div className="inline-block rounded-xl bg-white px-4 py-3">
+-            <Logo src={settings.logoUrl} name={settings.businessName} />
+-          </div>
++          {/* The default logo is made for dark blue; an uploaded one gets a white plate to stay readable. */}
++          {settings.hasCustomLogo ? (
++            <div className="inline-block rounded-xl bg-white px-4 py-3">
++              <Logo src={settings.logoUrl} name={settings.businessName} />
++            </div>
++          ) : (
++            <Logo src={settings.logoUrl} name={settings.businessName} size="large" />
++          )}
+           <p>
+             <FilledText text={settings.footerText} placeholders={placeholderValues(settings)} tone="dark" />
+           </p>
+@@ -30,7 +34,7 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+ 
+         <div className="space-y-3">
+           <h2 className="text-xl">Contact Us</h2>
+-          <PhoneNumberLink phone={settings.phone} className="text-2xl text-white underline" />
++          <PhoneNumberLink phone={settings.phone} tone="dark" className="text-2xl" />
+           <p>
+             <a href={`mailto:${settings.email}`} className="inline-flex items-center gap-2 break-all text-white underline">
+               <Mail aria-hidden="true" className="size-5 shrink-0" />
+diff --git a/src/components/site/site-header.tsx b/src/components/site/site-header.tsx
+index ac849a3..819f384 100644
+--- a/src/components/site/site-header.tsx
++++ b/src/components/site/site-header.tsx
+@@ -16,25 +16,32 @@ export function EmergencyServiceBadge() {
+ 
+ export function SiteHeader({ settings }: { settings: BusinessSettings }) {
+   return (
+-    <header className="on-dark relative bg-navy text-white">
+-      <div className="border-b border-white/20">
++    <header className="on-dark relative border-b border-white/10 bg-navy text-white">
++      <div className="border-b border-white/10 bg-navy-deep">
+         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2 sm:px-6">
+           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+             {settings.emergencyBadge && <EmergencyServiceBadge />}
+             {settings.licenseNumber && <p className="text-lg">License #{settings.licenseNumber}</p>}
+           </div>
+-          {/* Up to 1279px the big number lives up here; from 1280px it sits beside the menu. */}
+-          <div className="xl:hidden">
+-            <PhoneNumberLink phone={settings.phone} className="text-xl text-white underline lg:text-2xl" />
++          {/* On phones and tablets the number lives up here; from 1024px it is in the Call button. */}
++          <div className="lg:hidden">
++            <PhoneNumberLink phone={settings.phone} tone="dark" className="text-xl lg:text-2xl" />
+           </div>
+         </div>
+       </div>
+       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+-        {/* A white plate keeps any uploaded logo readable on dark blue. On narrow
+-            phones the logo shrinks so the Menu button always fits. */}
+-        <Link href="/" className="min-w-0 rounded-xl bg-white px-3 py-2 lg:shrink-0">
+-          <Logo src={settings.logoUrl} name={`${settings.businessName} home page`} className="max-w-[240px]" />
+-        </Link>
++        {/* The default logo is made for dark blue, so it sits on the header as is. An
++            uploaded logo gets a white plate to stay readable. On narrow phones the
++            logo shrinks so the Menu button always fits. */}
++        {settings.hasCustomLogo ? (
++          <Link href="/" className="min-w-0 rounded-xl bg-white px-3 py-2 lg:shrink-0">
++            <Logo src={settings.logoUrl} name={`${settings.businessName} home page`} className="max-w-[240px]" />
++          </Link>
++        ) : (
++          <Link href="/" className="min-w-0 rounded-lg lg:shrink-0">
++            <Logo src={settings.logoUrl} name={`${settings.businessName} home page`} size="large" />
++          </Link>
++        )}
+         <nav aria-label="Main" className="hidden lg:block">
+           <NavLinks
+             tone="dark"
+@@ -42,11 +49,8 @@ export function SiteHeader({ settings }: { settings: BusinessSettings }) {
+             linkClassName="block rounded-lg px-3 py-2 text-lg font-bold"
+           />
+         </nav>
+-        <div className="hidden items-center gap-4 lg:flex">
+-          <div className="hidden xl:block">
+-            <PhoneNumberLink phone={settings.phone} className="text-2xl text-white underline" />
+-          </div>
+-          <CallButton phone={settings.phone} variant="light" />
++        <div className="hidden lg:block">
++          <CallButton phone={settings.phone} withNumber pulse />
+         </div>
+         <MobileMenu />
+       </div>
+diff --git a/src/components/site/sticky-call-bar.tsx b/src/components/site/sticky-call-bar.tsx
+index 45f5326..0029ef9 100644
+--- a/src/components/site/sticky-call-bar.tsx
++++ b/src/components/site/sticky-call-bar.tsx
+@@ -9,9 +9,9 @@ import { ButtonLink, CallButton } from "./buttons";
+ export function StickyCallBar({ phone, homeHasRequestForm }: { phone: string; homeHasRequestForm: boolean }) {
+   const pathname = usePathname();
+   return (
+-    <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-silver bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(11,37,69,0.12)] lg:hidden">
++    <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-silver bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(10,21,37,0.14)] lg:hidden">
+       <div className="mx-auto grid max-w-xl grid-cols-2 gap-3">
+-        <CallButton phone={phone} className="px-2 min-[400px]:px-3" />
++        <CallButton phone={phone} pulse className="px-2 min-[400px]:px-3" />
+         <ButtonLink href={requestServiceHref(pathname, homeHasRequestForm)} variant="secondary" className="px-2 min-[400px]:px-3">
+           <ClipboardList aria-hidden="true" className="size-6 shrink-0 max-[400px]:hidden" />
+           Request Service
+diff --git a/src/server/content.ts b/src/server/content.ts
+index c944699..39c725e 100644
+--- a/src/server/content.ts
++++ b/src/server/content.ts
+@@ -5,7 +5,7 @@ import { starterSections } from "./starter-content";
+ 
+ const stringList = z.array(z.string()).catch([]);
+ 
+-export const DEFAULT_LOGO_URL = "/logo.svg";
++export const DEFAULT_LOGO_URL = "/logo.png";
+ 
+ export type BusinessSettings = {
+   businessName: string;
+diff --git a/src/server/uploads.ts b/src/server/uploads.ts
+index 1772765..eba7d3e 100644
+--- a/src/server/uploads.ts
++++ b/src/server/uploads.ts
+@@ -133,7 +133,7 @@ export async function readUpload(dataDir: string, name: string): Promise<{ data:
+ }
+ 
+ // Removes an uploaded file that's no longer used. Anything that isn't one of
+-// our uploads (like the default /logo.svg) is left alone.
++// our uploads (like the default /logo.png) is left alone.
+ export async function deleteUpload(dataDir: string, url: string | null | undefined): Promise<void> {
+   const name = url?.replace(/^\/uploads\//, "");
+   if (!name || !SAFE_NAME.test(name)) return;
