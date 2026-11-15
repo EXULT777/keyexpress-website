@@ -12,16 +12,20 @@ const linkTone: Record<Tone, string> = {
 
 // Admin text with {phone}, {email} and {city} filled in. The phone number and
 // email become links, so every phone number on the site can be tapped to call.
+// `plain` keeps them as text, for text that already sits inside a link.
 export function FilledText({
   text,
   placeholders,
   tone = "light",
+  plain = false,
 }: {
   text: string;
   placeholders: PlaceholderValues;
   tone?: Tone;
+  plain?: boolean;
 }) {
   return splitPlaceholders(text).map((part, index) => {
+    if (plain && part.kind !== "text") return <Fragment key={index}>{placeholders[part.kind]}</Fragment>;
     switch (part.kind) {
       case "text":
         return <Fragment key={index}>{part.text}</Fragment>;

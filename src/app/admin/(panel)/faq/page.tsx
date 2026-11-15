@@ -17,7 +17,7 @@ export default async function FaqAdminPage() {
   return (
     <>
       <AdminPageTitle title="Questions (FAQ)">
-        <p>The questions and answers on the home page and the FAQ page, in this order.</p>
+        <p>The questions and answers on the home page, in this order.</p>
       </AdminPageTitle>
       <ButtonLink href="/admin/faq/new" className="mb-8">
         <Plus aria-hidden="true" className="size-6" />

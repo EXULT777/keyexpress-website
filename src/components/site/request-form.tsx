@@ -21,7 +21,7 @@ const labels: Record<RequestField, string> = {
 const fieldOrder: RequestField[] = ["fullName", "phone", "email", "service", "address", "message"];
 
 const inputClasses =
-  "mt-2 block min-h-14 w-full rounded-xl border-2 border-ink-soft bg-white px-4 py-3 text-lg text-ink aria-[invalid=true]:border-error";
+  "mt-2 block min-h-14 w-full rounded-xl border-2 border-ink-soft bg-white px-4 py-3 text-lg text-ink transition-[border-color,box-shadow] focus:border-action focus:shadow-[0_0_0_4px_rgb(92_122_234/0.2)] aria-[invalid=true]:border-error";
 
 export function RequestServiceForm({
   services,
@@ -72,16 +72,16 @@ export function RequestServiceForm({
   const errors: RequestErrors = state.status === "invalid" ? state.errors : {};
 
   return (
-    <form action={formAction} noValidate className="mt-8 space-y-6">
+    <form action={formAction} noValidate className="mt-8 grid gap-6 sm:grid-cols-2 [&>*]:sm:col-span-2">
       <ProblemSummary ref={problemRef} state={state} errors={errors} placeholders={placeholders} />
 
       <Field name="fullName" error={errors.fullName}>
         {(props) => <input {...props} type="text" autoComplete="name" defaultValue={values.fullName} />}
       </Field>
-      <Field name="phone" error={errors.phone}>
+      <Field name="phone" error={errors.phone} half>
         {(props) => <input {...props} type="tel" inputMode="tel" autoComplete="tel" defaultValue={values.phone} />}
       </Field>
-      <Field name="email" error={errors.email} optional>
+      <Field name="email" error={errors.email} optional half>
         {(props) => <input {...props} type="email" autoComplete="email" defaultValue={values.email} />}
       </Field>
       <Field name="service" error={errors.service}>
@@ -104,8 +104,8 @@ export function RequestServiceForm({
         {(props) => <textarea {...props} rows={4} defaultValue={values.message} />}
       </Field>
 
-      <div className="rounded-xl bg-silver-light p-4">
-        <label className="flex cursor-pointer items-center gap-4 text-lg font-bold text-navy">
+      <div className="rounded-xl border border-silver bg-silver-soft p-4">
+        <label className="flex min-h-11 cursor-pointer items-center gap-4 text-lg font-bold text-navy">
           <input
             type="checkbox"
             name="emergency"
@@ -128,7 +128,7 @@ export function RequestServiceForm({
         </label>
       </div>
 
-      <button type="submit" disabled={pending} className={buttonClasses("primary", "w-full disabled:opacity-70 sm:w-auto")}>
+      <button type="submit" disabled={pending} className={buttonClasses("primary", "w-full disabled:opacity-70 sm:w-auto sm:justify-self-start")}>
         <Send aria-hidden="true" className="size-6 shrink-0" />
         {pending ? "Sending…" : buttonLabel}
       </button>
@@ -140,11 +140,14 @@ function Field({
   name,
   error,
   optional,
+  half,
   children,
 }: {
   name: RequestField;
   error?: string;
   optional?: boolean;
+  // Half the width from 640px, next to the other half-width field.
+  half?: boolean;
   children: (props: {
     id: string;
     name: string;
@@ -156,7 +159,7 @@ function Field({
 }) {
   const errorId = `${name}-error`;
   return (
-    <div>
+    <div className={half ? "sm:col-span-1!" : undefined}>
       <label htmlFor={`request-${name}`} className="block text-lg font-bold text-navy">
         {labels[name]}
       </label>

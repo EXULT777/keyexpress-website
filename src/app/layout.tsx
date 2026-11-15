@@ -16,6 +16,18 @@ const atkinson = localFont({
   adjustFontFallback: "Arial",
 });
 
+// Saira Expanded ExtraBold Italic (SIL Open Font License, src/fonts/OFL-Saira.txt)
+// for the public site's titles: wide, slanted letters that match the KEYS EXPRESS
+// logo. One weight, Latin only, cut from Google Fonts' variable Saira at width 125.
+const saira = localFont({
+  src: "../fonts/saira-expanded-extrabold-italic-latin.woff2",
+  weight: "800",
+  style: "italic",
+  variable: "--font-saira",
+  display: "swap",
+  adjustFontFallback: "Arial",
+});
+
 // Every page is rendered when it's requested, from the server's database. Nothing
 // is baked in at build time: the build machine's database is not the live one,
 // and the Admin's changes must show up as soon as they're saved.
@@ -26,12 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#0b2545",
+  themeColor: "#0b1650",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={atkinson.variable}>
+    // data-scroll-behavior: Next.js turns smooth scrolling off while it changes pages.
+    // Without it, opening the home page from another page stopped partway down.
+    <html lang="en" data-scroll-behavior="smooth" className={`${atkinson.variable} ${saira.variable}`}>
       <body className="font-sans">{children}</body>
     </html>
   );

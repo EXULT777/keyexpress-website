@@ -41,7 +41,7 @@ export function ServiceForm({
       <TextField
         name="longDescription"
         label="Longer description"
-        hint="Shown on the Services page. Leave an empty line between paragraphs."
+        hint="Saved for later: the website doesn't show it right now. Leave an empty line between paragraphs."
         multiline
         rows={10}
         defaultValue={values.longDescription}
@@ -52,7 +52,7 @@ export function ServiceForm({
       <ImagePicker
         id="service-image"
         legend="Picture (optional)"
-        hint="Shown next to the description on the Services page. PNG, JPG, WebP or SVG, up to 2 MB."
+        hint="Saved for later: the website doesn't show it right now. PNG, JPG, WebP or SVG, up to 2 MB."
         currentUrl={values.imageUrl}
         accept="image/png,image/jpeg,image/webp,image/svg+xml"
         shape="aspect-[4/3]"

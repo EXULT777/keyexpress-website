@@ -7,9 +7,9 @@ import { buttonClasses } from "@/components/site/buttons";
 import { logInAction, type LoginState } from "../actions";
 
 const messages = {
-  wrong: "That email and password don't match. Please try again.",
+  wrong: "That username and password don't match. Please try again.",
   "too-many": "Too many tries. For your security, please wait 15 minutes and try again.",
-  missing: "Please enter both your email and your password.",
+  missing: "Please enter both your username and your password.",
 };
 
 export function LoginForm() {
@@ -33,13 +33,17 @@ export function LoginForm() {
       )}
       <div>
         <label htmlFor="login-email" className="block text-lg font-bold text-navy">
-          Email
+          Username or email
         </label>
+        {/* Plain text, so the login can be a name like "Admin" as well as an email. */}
         <input
           id="login-email"
           name="email"
-          type="email"
+          type="text"
           autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           defaultValue={state.status === "idle" ? "" : state.email}
           className={inputClasses}
         />

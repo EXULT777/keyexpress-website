@@ -1,17 +1,31 @@
-// Every public page, in menu order. The menu, the footer, the sitemap and the
-// Admin's Search & Sharing list all come from this one list.
+// Every public page. The sitemap and the Admin's Search & Sharing list come from this list.
 export const publicPages = [
-  { path: "/", label: "Home", inMenu: true, adminName: "Home page", sitemapPriority: 1 },
-  { path: "/services", label: "Services", inMenu: true, adminName: "Services page", sitemapPriority: 0.9 },
-  { path: "/about", label: "About", inMenu: true, adminName: "About page", sitemapPriority: 0.6 },
-  { path: "/faq", label: "FAQ", inMenu: true, adminName: "Questions (FAQ) page", sitemapPriority: 0.6 },
-  { path: "/contact", label: "Contact", inMenu: true, adminName: "Contact page", sitemapPriority: 0.8 },
-  { path: "/privacy-policy", label: "Privacy Policy", inMenu: false, adminName: "Privacy Policy page", sitemapPriority: 0.2 },
+  { path: "/", adminName: "Home page", sitemapPriority: 1 },
+  { path: "/about", adminName: "About page", sitemapPriority: 0.6 },
+  { path: "/contact", adminName: "Contact page", sitemapPriority: 0.8 },
+  { path: "/privacy-policy", adminName: "Privacy Policy page", sitemapPriority: 0.2 },
 ] as const;
 
-export const mainNav = publicPages.filter((page) => page.inMenu);
+export type MenuLink = { href: string; label: string; homeSection?: "services" | "faq" };
 
-export const footerLinks = publicPages.filter((page) => page.path !== "/");
+// The menu, in order. Services and FAQ scroll to their sections on the home page,
+// so they only show while the home page shows that section.
+export const menuLinks: MenuLink[] = [
+  { href: "/", label: "Home" },
+  { href: "/#services", label: "Services", homeSection: "services" },
+  { href: "/about", label: "About" },
+  { href: "/#faq", label: "FAQ", homeSection: "faq" },
+  { href: "/contact", label: "Contact" },
+];
+
+export function visibleMenuLinks(homeShows: Record<NonNullable<MenuLink["homeSection"]>, boolean>) {
+  return menuLinks.filter((link) => !link.homeSection || homeShows[link.homeSection]);
+}
+
+// The footer has the menu without Home, plus the Privacy Policy.
+export function footerLinks(menu: MenuLink[]) {
+  return [...menu.filter((link) => link.href !== "/"), { href: "/privacy-policy", label: "Privacy Policy" }];
+}
 
 // "Request Service" scrolls to the form on the home page and opens the Contact
 // page (which has the same form) everywhere else, and from the home page too

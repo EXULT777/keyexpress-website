@@ -54,7 +54,6 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
     heading: "Our Services",
     text: "Whatever lock or key you need help with, we bring the tools to you.",
     cardLink: "Call for this service",
-    button: "See all services in detail",
   },
   "home.fobHighlight": {
     heading: "Need a New Key Fob? Get It Done Today",
@@ -79,11 +78,6 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
     heading: "Areas We Serve",
     text: "We proudly serve {city} and the surrounding communities, including:",
   },
-  "services.intro": {
-    heading: "Our Services",
-    text: "We're a fully mobile locksmith, so every service below comes to you: at home, at work, or wherever your car is parked. Not sure what you need? Call us at {phone} and we'll help you figure it out.",
-    jumpHeading: "Jump to a service",
-  },
   "about.intro": {
     heading: "About Key Express",
     text: [
@@ -92,12 +86,6 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
       "We also help homeowners, renters, property managers, and businesses with lockouts, rekeys, lock changes, and new hardware.",
       "Call us any time, day or night. We'll answer your questions and send a technician your way.",
     ].join("\n\n"),
-  },
-  "faq.intro": {
-    heading: "Frequently Asked Questions",
-    text: "Here are answers to the questions we hear most. If you don't see yours, call us at {phone}.",
-    closingHeading: "Still have a question?",
-    closingText: "Call us any time. We're happy to help.",
   },
   "contact.intro": {
     heading: "Contact Us",
@@ -327,22 +315,10 @@ export const starterSeo = [
       "Locked out or lost your keys? Key Express is a mobile locksmith serving {city} and nearby areas, 24/7. Car keys, key fobs, homes, and businesses. Call {phone}.",
   },
   {
-    path: "/services",
-    title: "Locksmith Services | Key Express",
-    description:
-      "Car key cutting and programming, smart keys, key fobs, transponder keys, ignition repair, and home and business locks. We come to you in {city}.",
-  },
-  {
     path: "/about",
     title: "About Us | Key Express",
     description:
       "Key Express is a fully mobile locksmith. We bring the tools to your driveway, home, or business, and we handle the jobs others turn down.",
-  },
-  {
-    path: "/faq",
-    title: "Questions and Answers | Key Express",
-    description:
-      "How fast can we get to you? Do we work 24/7? Can we make a key if you lost them all? Answers to common locksmith questions.",
   },
   {
     path: "/contact",

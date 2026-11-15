@@ -13,12 +13,12 @@ test.describe("Admin panel", () => {
 
   test("a wrong password is refused in plain words", async ({ page }) => {
     await page.goto("/admin/login");
-    await page.getByLabel("Email").fill(ADMIN.email);
+    await page.getByLabel("Username or email").fill(ADMIN.email);
     await page.getByLabel("Password").fill("not the password");
     await page.getByRole("button", { name: "Log in" }).click();
 
     await expect(page.getByRole("alert").filter({ hasText: "don't match" })).toHaveText(
-      "That email and password don't match. Please try again.",
+      "That username and password don't match. Please try again.",
     );
   });
 
@@ -62,7 +62,7 @@ test.describe("Admin panel", () => {
     await page.getByRole("button", { name: "Use the original Key Express logo again" }).click();
     await expect(page.getByText("Default logo restored ✓")).toBeVisible();
     await page.goto("/");
-    await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.svg");
+    await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.png");
   });
 
   test("a new Service can be added, hidden from the website, and deleted", async ({ page }) => {
@@ -74,14 +74,15 @@ test.describe("Admin panel", () => {
     await page.getByRole("button", { name: "Add this service" }).click();
     await expect(page.getByText("New service added ✓")).toBeVisible();
 
-    await page.goto("/services");
-    await expect(page.locator("#safe-opening h2")).toHaveText("Safe Opening");
+    const cards = page.locator("#services li h3");
+    await page.goto("/");
+    await expect(cards.filter({ hasText: "Safe Opening" })).toHaveCount(1);
 
     await page.goto("/admin/services");
     await page.getByRole("button", { name: /Hide.*Safe Opening/ }).click();
     await expect(page.getByText("Now hidden from the website ✓")).toBeVisible();
-    await page.goto("/services");
-    await expect(page.locator("#safe-opening")).toHaveCount(0);
+    await page.goto("/");
+    await expect(cards.filter({ hasText: "Safe Opening" })).toHaveCount(0);
 
     await page.goto("/admin/services");
     await page.getByRole("button", { name: /Delete.*Safe Opening/ }).click();
@@ -104,9 +105,8 @@ test.describe("Admin panel", () => {
     await expect(page.getByText("Saved ✓")).toBeVisible();
 
     try {
-      await page.goto("/services");
-      await expect(page.locator("#smart-keys h2")).toHaveText("Smart Keys & Push-to-Start");
-      await page.goto("/faq");
+      await page.goto("/");
+      await expect(page.locator("#services li h3").filter({ hasText: "Smart Keys & Push-to-Start" })).toHaveCount(1);
       await page.getByText("How quickly can you get to me?").click();
       const answer = page.locator("details[open]");
       await expect(answer.getByText("Usually within 20–40 minutes.")).toBeVisible();
@@ -129,32 +129,6 @@ test.describe("Admin panel", () => {
     }
   });
 
-  test("a Service photo is shown on the Services page, resized for the screen", async ({ page }, testInfo) => {
-    const photo = testInfo.outputPath("van.jpg");
-    await sharp({ create: { width: 1600, height: 1200, channels: 3, background: "#1e56c7" } }).jpeg().toFile(photo);
-    await logIn(page);
-    await page.goto("/admin/services");
-    await page.getByRole("link", { name: /Edit.*Residential/ }).click();
-    await page.getByLabel("Choose a picture").setInputFiles(photo);
-    await page.getByRole("button", { name: "Save changes" }).click();
-    await expect(page.getByText("Saved ✓")).toBeVisible();
-
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/services#residential");
-    const image = page.locator("#residential img");
-    await expect(image).toHaveAttribute("alt", "Residential");
-    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.currentSrc)).toContain("/_next/image?url=%2Fuploads%2Fservice-");
-
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto("/admin/services");
-    await page.getByRole("link", { name: /Edit.*Residential/ }).click();
-    await page.getByLabel("Remove this picture").check();
-    await page.getByRole("button", { name: "Save changes" }).click();
-    await expect(page.getByText("Saved ✓")).toBeVisible();
-    await page.goto("/services");
-    await expect(page.locator("#residential img")).toHaveCount(0);
-  });
-
   test("with the home page's form hidden, Request Service opens the Contact page's form", async ({ page }) => {
     await logIn(page);
     await page.goto("/admin/content");
@@ -173,6 +147,31 @@ test.describe("Admin panel", () => {
     } finally {
       await page.goto("/admin/content");
       const again = page.locator("details", { hasText: "Request service form" });
+      await again.locator("summary").click();
+      await again.getByLabel("Show this section on the home page").check();
+      await again.getByRole("button", { name: "Save changes" }).click();
+      await expect(again.getByText("Saved ✓")).toBeVisible();
+    }
+  });
+
+  test("with the home page's questions hidden, FAQ goes from the menu and the footer", async ({ page }) => {
+    await logIn(page);
+    await page.goto("/admin/content");
+    const faq = page.locator("details", { hasText: "Questions and answers" });
+    await faq.locator("summary").click();
+    await faq.getByLabel("Show this section on the home page").uncheck();
+    await faq.getByRole("button", { name: "Save changes" }).click();
+    await expect(faq.getByText("Saved ✓")).toBeVisible();
+
+    try {
+      await page.goto("/about");
+      await expect(page.locator("#faq")).toHaveCount(0);
+      await expect(page.locator("header").getByRole("link", { name: "FAQ" })).toHaveCount(0);
+      await expect(page.locator("footer").getByRole("link", { name: "FAQ" })).toHaveCount(0);
+      await expect(page.locator("header").getByRole("link", { name: "Services" })).toHaveCount(1);
+    } finally {
+      await page.goto("/admin/content");
+      const again = page.locator("details", { hasText: "Questions and answers" });
       await again.locator("summary").click();
       await again.getByLabel("Show this section on the home page").check();
       await again.getByRole("button", { name: "Save changes" }).click();
@@ -203,14 +202,14 @@ test.describe("Admin panel", () => {
     await page.getByLabel("Answer", { exact: true }).fill("No. We tell you the price before we start.");
     await page.getByRole("button", { name: "Add this question" }).click();
     await expect(page.getByText("New question added ✓")).toBeVisible();
-    await page.goto("/faq");
+    await page.goto("/");
     await expect(page.getByText("Do you charge for estimates?")).toBeVisible();
 
     await page.goto("/admin/faq");
     await page.getByRole("button", { name: /Delete.*Do you charge for estimates/ }).click();
     await page.getByRole("button", { name: "Yes, delete it" }).click();
     await expect(page.getByText("Question deleted ✓")).toBeVisible();
-    await page.goto("/faq");
+    await page.goto("/");
     await expect(page.getByText("Do you charge for estimates?")).toHaveCount(0);
   });
 

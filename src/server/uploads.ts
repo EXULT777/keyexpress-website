@@ -133,7 +133,7 @@ export async function readUpload(dataDir: string, name: string): Promise<{ data:
 }
 
 // Removes an uploaded file that's no longer used. Anything that isn't one of
-// our uploads (like the default /logo.svg) is left alone.
+// our uploads (like the default /logo.png) is left alone.
 export async function deleteUpload(dataDir: string, url: string | null | undefined): Promise<void> {
   const name = url?.replace(/^\/uploads\//, "");
   if (!name || !SAFE_NAME.test(name)) return;

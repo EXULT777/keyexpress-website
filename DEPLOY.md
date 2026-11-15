@@ -57,7 +57,7 @@ Under **Environment variables**, click **ADD VARIABLE** for each of these:
 | --- | --- |
 | `DATA_DIR` | the full path from step 2, e.g. `/home/johnsmith/keyexpress-data`. It must start with `/home/`; a short name like `data` would put your database inside the app folder, where an update could delete it |
 | `SITE_URL` | your address, exactly as people should see it, e.g. `https://www.keyexpress.com` |
-| `ADMIN_EMAIL` | the email you'll log in with |
+| `ADMIN_EMAIL` | the email or username you'll log in with (capitals don't matter) |
 | `ADMIN_PASSWORD` | a password of at least 10 characters. A short sentence is easy to remember |
 
 Email is optional (see *Email for new requests* below). Then click **CREATE** (or **SAVE**), and **START APP** (or **RESTART**).

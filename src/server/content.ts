@@ -5,7 +5,7 @@ import { starterSections } from "./starter-content";
 
 const stringList = z.array(z.string()).catch([]);
 
-export const DEFAULT_LOGO_URL = "/logo.svg";
+export const DEFAULT_LOGO_URL = "/logo.png";
 
 export type BusinessSettings = {
   businessName: string;

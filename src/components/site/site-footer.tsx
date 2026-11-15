@@ -1,7 +1,7 @@
 import { Banknote, CreditCard, Mail, Smartphone } from "lucide-react";
 import { createElement } from "react";
 import Link from "next/link";
-import { footerLinks } from "@/lib/navigation";
+import type { MenuLink } from "@/lib/navigation";
 import { placeholderValues } from "@/lib/placeholders";
 import type { BusinessSettings } from "@/server/content";
 import { PhoneNumberLink } from "./buttons";
@@ -14,15 +14,19 @@ function paymentIcon(method: string) {
   return CreditCard;
 }
 
-export function SiteFooter({ settings }: { settings: BusinessSettings }) {
+export function SiteFooter({ settings, links }: { settings: BusinessSettings; links: MenuLink[] }) {
   return (
-    <footer className="on-dark bg-navy text-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+    <footer className="on-dark border-t border-white/10 bg-navy-deep text-white">
+      <div className="mx-auto grid max-w-6xl gap-x-8 gap-y-10 px-4 py-12 sm:px-6 md:grid-cols-2 md:py-14 lg:grid-cols-[1.2fr_1.2fr_0.8fr_1fr]">
         <div className="space-y-4">
-          {/* A white plate keeps any uploaded logo readable on dark blue. */}
-          <div className="inline-block rounded-xl bg-white px-4 py-3">
-            <Logo src={settings.logoUrl} name={settings.businessName} />
-          </div>
+          {/* The default logo is made for dark blue; an uploaded one gets a white plate to stay readable. */}
+          {settings.hasCustomLogo ? (
+            <div className="inline-block rounded-xl bg-white px-4 py-3">
+              <Logo src={settings.logoUrl} name={settings.businessName} />
+            </div>
+          ) : (
+            <Logo src={settings.logoUrl} name={settings.businessName} size="large" />
+          )}
           <p>
             <FilledText text={settings.footerText} placeholders={placeholderValues(settings)} tone="dark" />
           </p>
@@ -30,7 +34,7 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
 
         <div className="space-y-3">
           <h2 className="text-xl">Contact Us</h2>
-          <PhoneNumberLink phone={settings.phone} className="text-2xl text-white underline" />
+          <PhoneNumberLink phone={settings.phone} tone="dark" className="text-2xl" />
           <p>
             <a href={`mailto:${settings.email}`} className="inline-flex items-center gap-2 break-all text-white underline">
               <Mail aria-hidden="true" className="size-5 shrink-0" />
@@ -43,10 +47,10 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
 
         <nav aria-label="Footer" className="space-y-3">
           <h2 className="text-xl">Pages</h2>
-          <ul className="space-y-1">
-            {footerLinks.map((link) => (
-              <li key={link.path}>
-                <Link href={link.path} className="inline-flex min-h-11 items-center text-white underline">
+          <ul className="grid grid-cols-2 gap-x-6 md:grid-cols-1">
+            {links.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="inline-flex min-h-11 items-center text-white underline decoration-white/40 hover:decoration-sky">
                   {link.label}
                 </Link>
               </li>
@@ -56,10 +60,10 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
 
         <div className="space-y-3">
           <h2 className="text-xl">Payment We Accept</h2>
-          <ul className="space-y-2">
+          <ul className="flex flex-wrap gap-2">
             {settings.paymentMethods.map((method) => (
-              <li key={method} className="flex items-center gap-3">
-                {createElement(paymentIcon(method), { "aria-hidden": true, className: "size-6 shrink-0" })}
+              <li key={method} className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
+                {createElement(paymentIcon(method), { "aria-hidden": true, className: "size-5 shrink-0 text-sky" })}
                 {method}
               </li>
             ))}
@@ -67,7 +71,7 @@ export function SiteFooter({ settings }: { settings: BusinessSettings }) {
         </div>
       </div>
       <div className="border-t border-white/25">
-        <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-6 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-x-6 gap-y-1 px-4 py-6 text-silver-soft sm:px-6">
           <p>
             © {new Date().getFullYear()} {settings.businessName}. All rights reserved.
           </p>

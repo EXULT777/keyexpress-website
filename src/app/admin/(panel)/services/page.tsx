@@ -17,7 +17,7 @@ export default async function ServicesAdminPage() {
   return (
     <>
       <AdminPageTitle title="Services">
-        <p>The services shown on the home page and the Services page, in this order.</p>
+        <p>The services shown on the home page, in this order.</p>
       </AdminPageTitle>
       <ButtonLink href="/admin/services/new" className="mb-8">
         <Plus aria-hidden="true" className="size-6" />

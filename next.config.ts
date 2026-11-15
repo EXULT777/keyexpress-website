@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   // This folder is the project, even when a parent folder has its own lockfile.
   outputFileTracingRoot: path.resolve(import.meta.dirname),
   poweredByHeader: false,
+  // Services and Questions used to be pages of their own; they are now sections of the home page.
+  async redirects() {
+    return [
+      { source: "/services", destination: "/#services", permanent: false },
+      { source: "/faq", destination: "/#faq", permanent: false },
+    ];
+  },
   images: {
     // Only uploaded photos go through the image resizer, and never with a query string.
     localPatterns: [{ pathname: "/uploads/**", search: "" }],

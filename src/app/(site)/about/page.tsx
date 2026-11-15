@@ -19,12 +19,12 @@ export default async function AboutPage() {
   return (
     <>
       <PageHeader title={fillPlaceholders(about.heading, placeholders)} />
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 md:py-16">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-16">
         <div className="max-w-3xl space-y-5">
           <Paragraphs text={about.text} placeholders={placeholders} />
         </div>
         <div className="mt-8">
-          <CallButton phone={settings.phone} />
+          <CallButton phone={settings.phone} className="w-full sm:w-auto" />
         </div>
       </div>
       <Section labelledBy="why-heading" tone="silver">

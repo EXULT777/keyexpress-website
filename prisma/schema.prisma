@@ -43,7 +43,7 @@ model PageSection {
 
 model Service {
   id               Int     @id @default(autoincrement())
-  // Used as the link on the Services page, e.g. /services#smart-keys.
+  // A fixed name for the service, e.g. smart-keys. It doesn't change when the title does.
   slug             String  @unique
   title            String
   shortDescription String
@@ -72,7 +72,7 @@ model PrivacyPolicy {
 }
 
 model PageSeo {
-  // The page path, e.g. "/" or "/services".
+  // The page path, e.g. "/" or "/about".
   path        String  @id
   title       String
   description String

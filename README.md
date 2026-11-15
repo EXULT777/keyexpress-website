@@ -7,7 +7,7 @@ Built from the project brief in [`docs/spec.md`](docs/spec.md).
 ## What's in it
 
 **The public website**
-- Home, Services, About, FAQ, Contact and Privacy Policy pages, plus a friendly "page not found" page.
+- Home, About, Contact and Privacy Policy pages, plus a friendly "page not found" page. Services and FAQ are sections of the home page, and their menu links scroll to them (the old /services and /faq addresses redirect there).
 - The phone number is always in view: in the header on large screens, and in a bar fixed to the bottom of the screen on phones. Every phone number is a tap-to-call link.
 - A Request Service form. Requests are saved to the Admin inbox and, once email is set up, emailed too (with **EMERGENCY** at the start of the subject when the box is ticked).
 - Search-engine basics: a title and description for every page, Locksmith structured data, a sitemap, `robots.txt` (keeps `/admin` out of search results) and a sharing picture.
@@ -105,4 +105,4 @@ See **[DEPLOY.md](DEPLOY.md)** for Namecheap shared hosting (cPanel "Setup Node.
 
 ## Credits
 
-The font is Atkinson Hyperlegible Next by the Braille Institute, under the SIL Open Font License ([`src/fonts/OFL.txt`](src/fonts/OFL.txt)). Icons are from [Lucide](https://lucide.dev).
+The body font is Atkinson Hyperlegible Next by the Braille Institute, under the SIL Open Font License ([`src/fonts/OFL.txt`](src/fonts/OFL.txt)). The public site's titles use Saira Expanded ExtraBold Italic, chosen to match the logo, also under the SIL Open Font License ([`src/fonts/OFL-Saira.txt`](src/fonts/OFL-Saira.txt)). Icons are from [Lucide](https://lucide.dev).

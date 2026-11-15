@@ -28,7 +28,7 @@ const badge = z.object({
 
 type FieldKind = "line" | "text" | "badges";
 type FieldMeta = { label: string; kind: FieldKind };
-type Page = "home" | "services" | "about" | "faq" | "contact" | "not-found";
+type Page = "home" | "about" | "contact" | "not-found";
 
 function section<S extends z.ZodObject>(definition: {
   title: string;
@@ -89,12 +89,11 @@ export const pageSections = {
   "home.services": section({
     title: "Our services",
     page: "home",
-    schema: z.object({ heading: line(), text: text(), cardLink: line(40), button: line(40) }),
+    schema: z.object({ heading: line(), text: text(), cardLink: line(40) }),
     fields: {
       heading,
       text: paragraph,
       cardLink: { label: "Link on each service card (calls you)", kind: "line" },
-      button: { label: "Button text (opens the Services page)", kind: "line" },
     },
   }),
   "home.fobHighlight": section({
@@ -132,28 +131,11 @@ export const pageSections = {
     schema: z.object({ heading: line(), text: text() }),
     fields: { heading, text: { label: "Text above the list of towns", kind: "text" } },
   }),
-  "services.intro": section({
-    title: "Services page",
-    page: "services",
-    schema: z.object({ heading: line(), text: text(), jumpHeading: line(60) }),
-    fields: { heading, text: paragraph, jumpHeading: { label: "Heading above the list of service links", kind: "line" } },
-  }),
   "about.intro": section({
     title: "About page",
     page: "about",
     schema: z.object({ heading: line(), text: text(5000) }),
     fields: { heading, text: { label: "Text (leave an empty line between paragraphs)", kind: "text" } },
-  }),
-  "faq.intro": section({
-    title: "Questions page",
-    page: "faq",
-    schema: z.object({ heading: line(), text: text(), closingHeading: line(80), closingText: text(300) }),
-    fields: {
-      heading,
-      text: paragraph,
-      closingHeading: { label: "Heading of the box at the end", kind: "line" },
-      closingText: { label: "Text of the box at the end", kind: "text" },
-    },
   }),
   "contact.intro": section({
     title: "Contact page",

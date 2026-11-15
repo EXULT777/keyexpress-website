@@ -17,7 +17,7 @@ export default async function PrivacyPolicyPage() {
         <p>Last updated: {lastUpdated}</p>
       </PageHeader>
       <div
-        className="policy mx-auto max-w-3xl px-4 py-12 sm:px-6 md:py-16"
+        className="policy mx-auto max-w-3xl px-4 py-10 sm:px-6 md:py-16"
         // renderMarkdown strips everything but plain formatting (see src/server/markdown.ts).
         dangerouslySetInnerHTML={{ __html: renderMarkdown(policy.markdown, values) }}
       />

@@ -21,11 +21,7 @@ export default async function EditServicePage({ params, searchParams }: PageProp
   return (
     <>
       <BackLink href="/admin/services" label="Back to all services" />
-      <AdminPageTitle title={`Edit: ${service.title}`}>
-        <p>
-          On the website at <strong>/services#{service.slug}</strong>
-        </p>
-      </AdminPageTitle>
+      <AdminPageTitle title={`Edit: ${service.title}`} />
       {justAdded && (
         <p role="status" className="mb-6 flex items-center gap-2 rounded-xl border-2 border-success bg-white p-4 text-xl font-bold text-success">
           <CircleCheck aria-hidden="true" className="size-7" />

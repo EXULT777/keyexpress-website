@@ -4,8 +4,7 @@ import { cn } from "@/lib/cn";
 const tones = {
   white: "bg-white",
   silver: "bg-silver-light",
-  brushed: "bg-brushed",
-  navy: "on-dark bg-navy text-white",
+  navy: "on-dark bg-night text-white",
 };
 
 export function Section({
@@ -22,7 +21,7 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section id={id} aria-labelledby={labelledBy} className={cn("scroll-mt-4 py-14 md:py-20", tones[tone], className)}>
+    <section id={id} aria-labelledby={labelledBy} className={cn("py-12 md:py-20", tones[tone], className)}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">{children}</div>
     </section>
   );

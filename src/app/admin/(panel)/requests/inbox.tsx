@@ -132,7 +132,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
                     <PhoneLink phone={request.phone} />
                     {request.email && (
                       <p className="break-all">
-                        <a href={`mailto:${request.email}`} className="text-action underline">
+                        <a href={`mailto:${request.email}`} className="text-action-hover underline">
                           {request.email}
                         </a>
                       </p>
@@ -180,7 +180,7 @@ export function Inbox({ requests }: { requests: InboxRequest[] }) {
                     <div>
                       <dt className="font-bold text-navy">Email</dt>
                       <dd className="break-all">
-                        <a href={`mailto:${request.email}`} className="text-action underline">
+                        <a href={`mailto:${request.email}`} className="text-action-hover underline">
                           {request.email}
                         </a>
                       </dd>
@@ -240,7 +240,7 @@ function EmergencyFlag() {
 
 function PhoneLink({ phone }: { phone: string }) {
   return (
-    <a href={telHref(phone)} className="inline-flex items-center gap-2 font-bold whitespace-nowrap text-action underline">
+    <a href={telHref(phone)} className="inline-flex items-center gap-2 font-bold whitespace-nowrap text-action-hover underline">
       <Phone aria-hidden="true" className="size-5" />
       {phone}
     </a>

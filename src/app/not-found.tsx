@@ -17,11 +17,11 @@ export default async function NotFound() {
 
   return (
     <SiteChrome>
-      <div className="bg-brushed">
+      <div className="on-dark bg-night text-white">
         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 md:py-24">
           <h1 className="text-[2rem] font-extrabold md:text-5xl">{fillPlaceholders(content.heading, placeholders)}</h1>
-          <p className="mt-5 text-xl">
-            <FilledText text={content.text} placeholders={placeholders} />
+          <p className="mt-5 text-xl text-silver-soft">
+            <FilledText text={content.text} placeholders={placeholders} tone="dark" />
           </p>
           <div className="mt-8">
             <ButtonLink href="/" className="w-full sm:w-auto">
@@ -30,7 +30,7 @@ export default async function NotFound() {
             </ButtonLink>
           </div>
           <p className="mt-8">
-            <PhoneNumberLink phone={settings.phone} className="text-3xl text-navy hover:text-action-hover" />
+            <PhoneNumberLink phone={settings.phone} tone="dark" className="text-3xl" />
           </p>
         </div>
       </div>

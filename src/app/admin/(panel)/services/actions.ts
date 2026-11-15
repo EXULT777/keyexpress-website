@@ -45,7 +45,7 @@ export async function saveService(id: number | null, _previous: ActionResult, fo
       data: {
         ...parsed.data,
         imagePath: imagePath ?? null,
-        // The link on the Services page; it stays the same if the title changes later.
+        // The service's fixed name in links; it stays the same if the title changes later.
         slug: uniqueSlug(parsed.data.title, new Set(existing.map((service) => service.slug))),
         sortOrder: nextSortOrder(highest._max.sortOrder),
       },
