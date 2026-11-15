@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64" role="img" aria-labelledby="ke1i-t">
+<title id="ke1i-t">Key Express</title>
+<defs><linearGradient id="ke1i-tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e56c7"/><stop offset="1" stop-color="#0b2545"/></linearGradient><linearGradient id="ke1i-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c5ccd6"/></linearGradient></defs>
+<path fill="url(#ke1i-tile)" d="M24 0H76C89.25 0 100 10.75 100 24V76C100 89.25 89.25 100 76 100H24C10.75 100 0 89.25 0 76V24C0 10.75 10.75 0 24 0Z"/>
+<path fill="url(#ke1i-metal)" d="M39.73 46.22C33.38 49.33 25.5 48.25 20.22 42.97C13.58 36.33 13.58 25.57 20.22 18.93C26.86 12.29 37.62 12.29 44.26 18.93C49.54 24.21 50.62 32.09 47.51 38.44L83.15 74.08C85.3 76.23 85.3 79.71 83.15 81.86C81.37 83.64 78.67 83.95 76.58 82.78L76.43 82.92L71.08 86.05L68.35 83.33L63.3 83.93L60.58 81.21L61.88 75.44L59.16 72.72L54.11 73.32L51.38 70.6L56.63 63.12ZM37.54 36.25C40.47 33.32 40.47 28.57 37.54 25.65C34.61 22.72 29.86 22.72 26.94 25.65C24.01 28.57 24.01 33.32 26.94 36.25C29.86 39.18 34.61 39.18 37.54 36.25Z"/>
+</svg>

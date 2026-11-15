@@ -1,0 +1,116 @@
+// Key Express data model. Words follow GLOSSARY.md.
+// The database file lives in DATA_DIR (see src/server/paths.ts), never in the code folder.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// One row (id 1). Every page reads the phone number and other business facts from here.
+model BusinessSettings {
+  id                Int      @id @default(1)
+  businessName      String
+  phone             String
+  email             String
+  // Where new Service Request emails go. Empty means "use the business email".
+  notificationEmail String   @default("")
+  serviceAreaCity   String
+  // JSON array of Town names, in display order.
+  towns             Json
+  // JSON array of payment method labels, in display order.
+  paymentMethods    Json
+  emergencyBadge    Boolean  @default(true)
+  // Shown in the header and footer only when filled in.
+  licenseNumber     String   @default("")
+  footerText        String
+  // Uploaded logo, served from /uploads. Null means the default /logo.svg.
+  logoPath          String?
+  updatedAt         DateTime @updatedAt
+}
+
+model PageSection {
+  // Fixed keys such as "home.hero" or "about.intro". Each key's fields, and the
+  // order on the page, are defined in src/lib/page-sections.ts.
+  key     String  @id
+  content Json
+  // Only Home Sections can be hidden.
+  visible Boolean @default(true)
+}
+
+model Service {
+  id               Int     @id @default(autoincrement())
+  // A fixed name for the service, e.g. smart-keys. It doesn't change when the title does.
+  slug             String  @unique
+  title            String
+  shortDescription String
+  // Plain text; a blank line starts a new paragraph.
+  longDescription  String
+  // One of the icon names in src/lib/service-icons.ts.
+  icon             String
+  imagePath        String?
+  visible          Boolean @default(true)
+  sortOrder        Int
+}
+
+model Faq {
+  id        Int     @id @default(autoincrement())
+  question  String
+  answer    String
+  visible   Boolean @default(true)
+  sortOrder Int
+}
+
+// One row (id 1). updatedAt is the "Last updated" date shown on the page.
+model PrivacyPolicy {
+  id        Int      @id @default(1)
+  markdown  String
+  updatedAt DateTime @updatedAt
+}
+
+model PageSeo {
+  // The page path, e.g. "/" or "/about".
+  path        String  @id
+  title       String
+  description String
+  ogImagePath String?
+}
+
+model ServiceRequest {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  fullName  String
+  phone     String
+  email     String   @default("")
+  // The Service title the Customer picked, or "Not sure". A copy, so later renames don't change old requests.
+  service   String
+  address   String
+  message   String   @default("")
+  emergency Boolean  @default(false)
+  // NEW, CONTACTED or DONE (see src/lib/service-request.ts).
+  status    String   @default("NEW")
+
+  @@index([createdAt])
+}
+
+model Admin {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  passwordHash   String
+  // Raised when the password changes, which signs out every other session.
+  sessionVersion Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// One row per attempt, for rate limiting login and the request form across server processes.
+model RateLimitHit {
+  id        Int      @id @default(autoincrement())
+  bucket    String
+  createdAt DateTime @default(now())
+
+  @@index([bucket, createdAt])
+}

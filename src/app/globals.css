@@ -1,0 +1,428 @@
+@import "tailwindcss";
+
+/* Key Express colors, from the Color Hunt palette 14279B · 3D56B2 · 5C7AEA · E6E6E6
+   (colorhunt.co/palette/14279b3d56b25c7aeae6e6e6):
+   - royal #14279b: headings and the deep end of the top-section gradient.
+   - navy: royal darkened to #0b1650 for the header, footer and dark bands. The
+     logo's blue letters only reach 3:1 on royal, 4.3:1 here.
+   - action #3d56b2: buttons and links (white text on it is 6.6:1).
+   - periwinkle #5c7aea: glows, accent lines and icons; too light for small
+     text, so sky (#9fb1f5, a tint of it) is the text and icon color on navy.
+   - silver-light #e6e6e6: the alternating light sections, with white cards.
+   Every text/background pair meets WCAG AA; scripts/check-contrast.mjs checks
+   them. Red is only for the 24/7 Emergency badge. */
+@theme {
+  --color-royal: #14279b;
+  --color-periwinkle: #5c7aea;
+  --color-navy: #0b1650;
+  --color-navy-deep: #081040;
+  --color-navy-raised: #14279b;
+  --color-action: #3d56b2;
+  --color-action-hover: #14279b;
+  --color-sky: #9fb1f5;
+  --color-silver: #d3d7e6;
+  --color-silver-soft: #edeff7;
+  --color-silver-light: #e6e6e6;
+  --color-ink: #1b1f3b;
+  --color-ink-soft: #4a5070;
+  --color-emergency: #c62828;
+  --color-success: #1e6b3a;
+  --color-error: #b3261e;
+
+  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    /* Phones keep the sizes set here instead of inflating text in landscape. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Links to a spot on the page stop below the header bar that follows the visitor down. */
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--color-ink);
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--color-royal);
+    font-weight: 700;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .on-dark h1,
+  .on-dark h2,
+  .on-dark h3 {
+    color: #ffffff;
+  }
+
+  /* The public site's titles use the logo's lettering. The Admin keeps the body font. */
+  .site-titles :is(h1, h2, h3) {
+    font-family: var(--font-saira), var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 800;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+
+  /* A thick outline that shows on both white and dark blue backgrounds. */
+  :focus-visible {
+    outline: 3px solid var(--color-action);
+    outline-offset: 3px;
+  }
+
+  .on-dark :focus-visible {
+    outline-color: #ffffff;
+  }
+
+  .on-dark .on-light :focus-visible {
+    outline-color: var(--color-action);
+  }
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+/* Admin-written Markdown (the Privacy Policy and its preview). */
+@layer components {
+  .policy > * + * {
+    margin-top: 1rem;
+  }
+
+  .policy h2 {
+    margin-top: 2.5rem;
+    font-size: 1.625rem;
+  }
+
+  .policy h3,
+  .policy h4 {
+    margin-top: 2rem;
+    font-size: 1.375rem;
+  }
+
+  .policy ul,
+  .policy ol {
+    padding-left: 1.75rem;
+  }
+
+  .policy ul {
+    list-style: disc;
+  }
+
+  .policy ol {
+    list-style: decimal;
+  }
+
+  .policy li + li {
+    margin-top: 0.5rem;
+  }
+
+  .policy a {
+    color: var(--color-action);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .policy a:hover {
+    color: var(--color-action-hover);
+  }
+
+  .policy blockquote {
+    border-left: 4px solid var(--color-silver);
+    padding-left: 1rem;
+  }
+}
+
+/* Button motion: a soft glow comes up around a button on hover or keyboard focus,
+   the button presses in when tapped, and call buttons can send out a soft pulsing
+   ring. The reduced-motion rule at the end of this file turns the motion off. */
+@layer components {
+  .btn-motion {
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      box-shadow 0.25s ease-out,
+      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-motion:active {
+    transform: translateY(1px) scale(0.97);
+  }
+
+  .btn-pulse {
+    animation: call-pulse 2.6s ease-out infinite;
+  }
+
+  /* The sticky header bar (sticky-header.tsx). Once the visitor scrolls, it eases into
+     a slimmer look: a smaller logo, a darker bar and a shadow fading in underneath.
+     Only transform, opacity and color change, so nothing on the page moves and the
+     browser doesn't redraw the page on every frame. */
+  .site-header {
+    background-color: var(--color-navy);
+    will-change: transform;
+    transition: background-color 0.3s ease-out;
+  }
+
+  .site-header::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 18px;
+    background: linear-gradient(rgb(8 16 64 / 0.3), rgb(8 16 64 / 0));
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+    pointer-events: none;
+  }
+
+  .site-header .header-logo {
+    transform-origin: left center;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .site-header[data-scrolled] {
+    background-color: var(--color-navy-deep);
+  }
+
+  .site-header[data-scrolled]::after {
+    opacity: 1;
+  }
+
+  .site-header[data-scrolled] .header-logo {
+    transform: scale(0.86);
+  }
+
+  /* The pulsing ring repaints every frame; it rests while the bar follows the visitor. */
+  .site-header[data-scrolled] .btn-pulse {
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .site-header::after,
+    .site-header .header-logo {
+      transition: none;
+    }
+  }
+}
+
+/* Cards, the phone menu and the sticky call bar. */
+@layer components {
+  /* A Service tile lifts a little on hover and presses in when tapped. */
+  .service-tile {
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.25s ease-out,
+      border-color 0.2s;
+  }
+
+  /* Only where there's a mouse: on a touch screen a tapped tile would stay lifted. */
+  @media (hover: hover) {
+    .service-tile:hover {
+      border-color: rgb(92 122 234 / 0.6);
+      box-shadow: 0 22px 40px -24px rgb(20 39 155 / 0.45);
+      transform: translateY(-3px);
+    }
+
+    .service-tile:hover .service-tile-call {
+      background-color: var(--color-action);
+      color: #ffffff;
+    }
+  }
+
+  .service-tile:active {
+    transform: scale(0.97);
+  }
+
+  .service-tile:active .service-tile-call {
+    background-color: var(--color-action);
+    color: #ffffff;
+  }
+
+  /* The key fob block: a soft blue card with a blue-to-periwinkle edge. */
+  .callout-highlight {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--color-silver-soft), var(--color-silver-soft)) padding-box,
+      linear-gradient(120deg, var(--color-action), var(--color-periwinkle)) border-box;
+  }
+
+  /* The phone menu slides down when it opens. */
+  .menu-panel:not([hidden]) {
+    animation: menu-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .menu-backdrop {
+    animation: fade-in 0.22s ease-out;
+  }
+
+  /* An opened FAQ answer fades in. */
+  details[open] > .faq-answer {
+    animation: fade-in 0.25s ease-out;
+  }
+
+  /* The sticky call bar steps out of the way while the visitor types in a form, so
+     it doesn't sit on the on-screen keyboard over the field (sticky-call-bar.tsx). */
+  .call-bar {
+    transition:
+      transform 0.25s ease-out,
+      visibility 0.25s;
+  }
+
+  .call-bar[data-typing] {
+    transform: translateY(110%);
+    visibility: hidden;
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The home page padlock (lock-illustration.tsx): the shackle snaps shut on load, the
+   keyhole lights up, then the lock floats gently. Still for reduced motion. A tap
+   plays it again, and the float rests while it's off screen (lock-showcase.tsx). */
+.lock-showcase {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lock-showcase:active {
+  transform: scale(0.96);
+}
+
+.lock-showcase[data-resting] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lock-shackle {
+    animation: lock-close 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s both;
+  }
+
+  .lock-keyglow {
+    animation: lock-light 0.9s ease-out 0.9s both;
+  }
+
+  .lock-float {
+    animation: lock-float 7s ease-in-out 1.2s infinite;
+  }
+}
+
+@keyframes lock-close {
+  from {
+    transform: translateY(-30px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes lock-light {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lock-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Outside the layers so it wins over the buttons' own drop shadows (Tailwind
+   shadow-[…] utilities). A pulsing call button stops pulsing while it glows. */
+.btn-motion:hover,
+.btn-motion:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--glow, rgb(92 122 234 / 0.35)),
+    0 0 26px 2px var(--glow, rgb(92 122 234 / 0.35));
+  animation: none;
+}
+
+@keyframes call-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--pulse, rgb(92 122 234 / 0.55));
+  }
+  70%,
+  100% {
+    /* Fade out in the ring's own color, so it doesn't turn grey on midnight. */
+    box-shadow: 0 0 0 14px var(--pulse-end, rgb(92 122 234 / 0));
+  }
+}
+
+/* Deep navy into royal blue with a soft periwinkle glow and a faint dot grid,
+   for the top of each page and the dark bands. Pair it with on-dark and white text. */
+@utility bg-night {
+  background-color: var(--color-navy);
+  background-image:
+    radial-gradient(56rem 28rem at 88% 8%, rgb(92 122 234 / 0.38), transparent 62%),
+    radial-gradient(40rem 22rem at 0% 110%, rgb(61 86 178 / 0.35), transparent 60%),
+    radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1.5px),
+    linear-gradient(160deg, var(--color-navy) 0%, var(--color-royal) 100%);
+  background-size:
+    auto,
+    auto,
+    22px 22px,
+    auto;
+}
+
+/* The thin line along the top of cards: action into periwinkle. */
+@utility bg-electric {
+  background-image: linear-gradient(90deg, var(--color-action) 0%, var(--color-periwinkle) 100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
