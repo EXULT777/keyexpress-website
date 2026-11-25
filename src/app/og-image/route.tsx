@@ -32,9 +32,9 @@ export async function GET() {
           fontFamily: "Atkinson Hyperlegible Next",
         }}
       >
-        {/* The default logo, made for dark backgrounds (585×168). */}
+        {/* The default logo, made for dark backgrounds (583×168). */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logo} alt="" width={522} height={150} />
+        <img src={logo} alt="" width={521} height={150} />
         <div style={{ marginTop: "48px", fontSize: 48, fontFamily: "Saira Expanded", fontStyle: "italic", fontWeight: 800 }}>
           24/7 Mobile Locksmith
         </div>

@@ -1,4 +1,4 @@
-# Deploying Key Express
+# Deploying Keys Express
 
 These steps put the site on **Namecheap shared hosting** using cPanel's **Setup Node.js App**. At the end there's a short note on Vercel.
 
@@ -113,7 +113,7 @@ Without email settings, requests are only saved in the Admin inbox. To also get 
 | `SMTP_PORT` | `465` |
 | `SMTP_USER` | the full mailbox address, e.g. `website@your-domain.com` |
 | `SMTP_PASSWORD` | that mailbox's password |
-| `SMTP_FROM` | e.g. `Key Express Website <website@your-domain.com>` |
+| `SMTP_FROM` | e.g. `Keys Express Website <website@your-domain.com>` |
 
 Emails go to the **Send new service requests to** address in Business Settings, or to the business email if that's empty. Emergencies start with **EMERGENCY** in the subject.
 

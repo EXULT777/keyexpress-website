@@ -18,7 +18,7 @@ export default async function AdminLoginPage() {
   return (
     <main id="main" className="flex min-h-screen items-start justify-center bg-silver-light px-4 py-12 md:items-center">
       <div className="w-full max-w-lg rounded-2xl border-2 border-silver bg-white p-6 md:p-10">
-        {/* The default logo is silver and blue for dark backgrounds, so it gets a navy plate here. */}
+        {/* The default logo is red and blue for dark backgrounds, so it gets a navy plate here. */}
         <div className={settings.hasCustomLogo ? "" : "inline-block rounded-xl bg-navy px-4 py-3"}>
           <Logo src={settings.logoUrl} name={settings.businessName} />
         </div>

@@ -1,5 +1,5 @@
 // `npx prisma db seed` (or `npm run db:seed`): fills an empty database with the
-// starter content (Business Settings, page text, the 9 Services, the 5 FAQs, the
+// starter content (Business Settings, page text, the 12 Services, the 5 FAQs, the
 // Privacy Policy and SEO) and creates the Admin from ADMIN_EMAIL/ADMIN_PASSWORD.
 //
 // The server does the same thing every time it starts (src/instrumentation.ts),

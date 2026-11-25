@@ -1,4 +1,4 @@
-// Key Express data model. Words follow GLOSSARY.md.
+// Keys Express data model. Words follow GLOSSARY.md.
 // The database file lives in DATA_DIR (see src/server/paths.ts), never in the code folder.
 
 generator client {

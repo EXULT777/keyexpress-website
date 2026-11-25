@@ -1,4 +1,4 @@
-# Build the "Key Express" Locksmith Website (Public Site + Admin Panel)
+# Build the "Keys Express" Locksmith Website (Public Site + Admin Panel)
 
 ## Your role
 Act as a **senior UI/UX designer** and a **senior full-stack developer** (front end and back end). Every decision should make the site look clean and professional and be very easy to use, **especially for older people and people who are not good with technology**. Plan the work first, then build it step by step, and test it before you say you are finished.
@@ -6,7 +6,7 @@ Act as a **senior UI/UX designer** and a **senior full-stack developer** (front 
 ---
 
 ## 1. Project summary
-- **Business name:** Key Express
+- **Business name:** Keys Express
 - **Type:** A fully mobile locksmith (no storefront). Technicians drive to the customer for car, home, and business lock and key jobs.
 - **Specialty:** Advanced car key cutting and programming, including smart keys, fobs, transponder keys, and European makes.
 - **Phone (placeholder):** (555) 014-7823. Store it in ONE place (site settings) so it can be changed from the admin panel.
@@ -14,7 +14,7 @@ Act as a **senior UI/UX designer** and a **senior full-stack developer** (front 
 - **Service area (placeholder):** "Your City and surrounding areas", with a list of 8 nearby towns, all editable in the admin panel.
 - **Availability:** 24/7 emergency service.
 - **Payment methods:** Cash, Visa, Mastercard, American Express, Discover, Apple Pay, Google Pay (editable).
-- **Logo:** We have no logo yet. Create a simple placeholder **SVG logo**: a rounded silver-and-blue key icon plus the wordmark "KEY EXPRESS" in a bold, clean sans-serif. Save it as `/public/logo.svg` and make it replaceable through an upload in the admin panel.
+- **Logo:** We have no logo yet. Create a simple placeholder **SVG logo**: a rounded silver-and-blue key icon plus the wordmark "KEYS EXPRESS" in a bold, clean sans-serif. Save it as `/public/logo.svg` and make it replaceable through an upload in the admin panel.
 
 ---
 
@@ -78,7 +78,7 @@ Logo (left) · nav · large phone number + "Call Now" button (right). A small re
 
 **2. Hero**
 - H1: **"Locked Out or Lost Your Keys? We'll Get You Back In, Fast."**
-- Text: "Key Express is a mobile locksmith serving Your City and nearby areas. We come straight to you, for cars, homes, and businesses."
+- Text: "Keys Express is a mobile locksmith serving Your City and nearby areas. We come straight to you, for cars, homes, and businesses."
 - Buttons: **"Get Help Now"** (calls the phone number) + **"Request Service"** (scrolls to the form)
 - The phone number in large text below the buttons.
 
@@ -94,11 +94,11 @@ Logo (left) · nav · large phone number + "Call Now" button (right). A small re
 
 **5. About Us**
 - H2: "Locksmith Help That Comes to You"
-- Text: "Key Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business. We're known for handling the difficult jobs: the advanced car keys and tricky locks that other companies often turn down."
+- Text: "Keys Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business. We're known for handling the difficult jobs: the advanced car keys and tricky locks that other companies often turn down."
 
 **6. Why Choose Us** (5 simple badges in a row; they wrap to 2 columns on mobile, each with an icon and a short line)
 - **Mobile Service:** "We come to your location."
-- **Fair Prices:** "Honest, affordable rates."
+- **Expert Technicians:** "Highly experienced professionals."
 - **Fast Response:** "Quick help when you need it."
 - **Licensed & Insured:** "Trained, professional technicians."
 - **Satisfaction Guaranteed:** "We're not done until you're happy."
@@ -136,7 +136,7 @@ On success: "Thank you! We received your request and will call you shortly. For 
 - Text: "We proudly serve Your City and the surrounding communities, including:" followed by a simple list of the 8 towns from settings.
 
 **13. Footer** (dark blue)
-Logo, short description, phone (large), email, service area, "Open 24/7 for emergencies", accepted payment method icons and labels, links (Services, About, FAQ, Contact, Privacy Policy), "© {year} Key Express. All rights reserved."
+Logo, short description, phone (large), email, service area, "Open 24/7 for emergencies", accepted payment method icons and labels, links (Services, About, FAQ, Contact, Privacy Policy), "© {year} Keys Express. All rights reserved."
 
 ### 4.2 FAQ (`/faq` page + section on home), all editable in the admin panel
 1. **How quickly can you get to me?**
@@ -161,7 +161,7 @@ Logo, short description, phone (large), email, service area, "Open 24/7 for emer
 
 ## 5. Privacy Policy (`/privacy-policy`, editable in the admin panel as rich text or markdown)
 Write a clear, plain-English privacy policy with these headings, and show "Last updated: {date}" at the top:
-1. **Who We Are:** Key Express, a mobile locksmith service; contact details.
+1. **Who We Are:** Keys Express, a mobile locksmith service; contact details.
 2. **Information We Collect:** name, phone, email, address or location, service details from the request form or phone calls; basic technical data (browser type, pages visited) through cookies or analytics.
 3. **How We Use Your Information:** to respond to requests, dispatch technicians, provide quotes, process payments, improve the website, and meet legal obligations.
 4. **Sharing Your Information:** we never sell personal data. It is shared only with service providers who help run the business (hosting, payment processing, email) or when required by law.

@@ -59,8 +59,9 @@ export function WhyChooseUsBadges({
 }
 
 // The Services list. Each Service is one tile, and the whole tile calls. On phones the
-// tiles are small squares two to a row with the icon and title; from 640px they grow
-// into cards with the short description too. Rows are centred, so a last row that
+// tiles are small squares two to a row with the icon and title; from 768px they grow
+// into cards with the short description too, three to a row from 1024px and four
+// from 1280px. Rows are centred, so a last row that
 // isn't full (any number of Services) still looks deliberate.
 export function ServiceTiles({
   services,
@@ -78,7 +79,7 @@ export function ServiceTiles({
       {services.map((service) => (
         <li
           key={service.id}
-          className="min-w-0 basis-[calc(50%-0.375rem)] md:basis-[calc(50%-0.75rem)] lg:basis-[calc((100%-3rem)/3)]"
+          className="min-w-0 basis-[calc(50%-0.375rem)] md:basis-[calc(50%-0.75rem)] lg:basis-[calc((100%-3rem)/3)] xl:basis-[calc((100%-4.5rem)/4)]"
         >
           <a
             href={telHref(phone)}

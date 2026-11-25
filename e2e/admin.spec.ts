@@ -59,7 +59,7 @@ test.describe("Admin panel", () => {
     expect((await page.request.get(src!)).headers()["content-type"]).toBe("image/webp");
 
     await page.goto("/admin/settings");
-    await page.getByRole("button", { name: "Use the original Key Express logo again" }).click();
+    await page.getByRole("button", { name: "Use the original Keys Express logo again" }).click();
     await expect(page.getByText("Default logo restored ✓")).toBeVisible();
     await page.goto("/");
     await expect(page.locator("header img").first()).toHaveAttribute("src", "/logo.png");
@@ -265,12 +265,12 @@ test.describe("Admin panel", () => {
     await logIn(page);
     await page.goto("/admin/seo");
     const about = page.locator("section", { has: page.getByRole("heading", { name: "About page" }) });
-    await about.getByLabel("Page title").fill("About Our Locksmiths | Key Express");
+    await about.getByLabel("Page title").fill("About Our Locksmiths | Keys Express");
     await about.getByRole("button", { name: "Save changes" }).click();
     await expect(about.getByText("Saved ✓")).toBeVisible();
 
     await page.goto("/about");
-    await expect(page).toHaveTitle("About Our Locksmiths | Key Express");
+    await expect(page).toHaveTitle("About Our Locksmiths | Keys Express");
   });
 
   test("a request can be marked done, and all requests downloaded as a spreadsheet", async ({ page }) => {

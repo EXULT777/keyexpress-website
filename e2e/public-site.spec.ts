@@ -221,7 +221,7 @@ test.describe("the public website", () => {
     await page.goto("/");
     const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}");
 
-    expect(data).toMatchObject({ "@type": "Locksmith", name: "Key Express", telephone: "(555) 014-7823" });
+    expect(data).toMatchObject({ "@type": "Locksmith", name: "Keys Express", telephone: "(555) 014-7823" });
     expect(data.areaServed).toHaveLength(9);
   });
 });

@@ -5,7 +5,7 @@ import type { IconName } from "@/lib/icons";
 // Text can use {phone}, {email} and {city}; pages fill in the current Business Settings.
 
 export const starterSettings = {
-  businessName: "Key Express",
+  businessName: "Keys Express",
   phone: "(555) 014-7823",
   email: "info@keyexpress.example",
   notificationEmail: "",
@@ -20,7 +20,7 @@ export const starterSettings = {
 export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
   "home.hero": {
     heading: "Locked Out or Lost Your Keys? We'll Get You Back In, Fast.",
-    text: "Key Express is a mobile locksmith serving {city} and nearby areas. We come straight to you, for cars, homes, and businesses.",
+    text: "Keys Express is a mobile locksmith serving {city} and nearby areas. We come straight to you, for cars, homes, and businesses.",
     callButton: "Get Help Now",
     requestButton: "Request Service",
     phoneIntro: "Call us any time, day or night:",
@@ -37,14 +37,14 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
   },
   "home.about": {
     heading: "Locksmith Help That Comes to You",
-    text: "Key Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business. We're known for handling the difficult jobs: the advanced car keys and tricky locks that other companies often turn down.",
+    text: "Keys Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business. We're known for handling the difficult jobs: the advanced car keys and tricky locks that other companies often turn down.",
     button: "More about us",
   },
   "home.whyChooseUs": {
     heading: "Why Choose Us",
     badges: [
       { icon: "truck", title: "Mobile Service", text: "We come to your location." },
-      { icon: "tag", title: "Fair Prices", text: "Honest, affordable rates." },
+      { icon: "award", title: "Expert Technicians", text: "Highly experienced professionals." },
       { icon: "clock", title: "Fast Response", text: "Quick help when you need it." },
       { icon: "shield", title: "Licensed & Insured", text: "Trained, professional technicians." },
       { icon: "thumbs-up", title: "Satisfaction Guaranteed", text: "We're not done until you're happy." },
@@ -79,9 +79,9 @@ export const starterSections: { [K in SectionKey]: SectionContent<K> } = {
     text: "We proudly serve {city} and the surrounding communities, including:",
   },
   "about.intro": {
-    heading: "About Key Express",
+    heading: "About Keys Express",
     text: [
-      "Key Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business.",
+      "Keys Express is a fully mobile locksmith company. Instead of you coming to a shop, we bring the tools and the expertise to your driveway, home, or business.",
       "We're known for handling the difficult jobs: the advanced car keys and tricky locks that other companies often turn down. Our vans carry the equipment to cut and program most car keys on the spot, including smart keys, key fobs, and transponder keys for domestic and European vehicles.",
       "We also help homeowners, renters, property managers, and businesses with lockouts, rekeys, lock changes, and new hardware.",
       "Call us any time, day or night. We'll answer your questions and send a technician your way.",
@@ -203,11 +203,44 @@ export const starterServices: StarterService[] = [
     slug: "commercial",
     title: "Commercial",
     icon: "door",
-    shortDescription: "Lock replacement, hardware upgrades, and master key systems for businesses.",
+    shortDescription: "Lock replacement, repairs, and commercial-grade hardware for offices, shops, and warehouses.",
     longDescription: paragraphs(
       "We replace and repair locks for offices, shops, and warehouses, including commercial-grade hardware.",
       "A master key system lets one key open every door, while each employee's key opens only the doors they need.",
       "When an employee leaves or a key goes missing, we can rekey your locks quickly so your business stays secure.",
+    ),
+  },
+  {
+    slug: "master-key-systems",
+    title: "Master Key Systems",
+    icon: "master-key",
+    shortDescription: "One key for every door, while each employee's key opens only the doors they need.",
+    longDescription: paragraphs(
+      "A master key system gives you one key that opens every door in your building, while each manager or employee carries a key that opens only the doors they need.",
+      "We plan the system with you, rekey or replace the locks, and cut and label every key, so you always know who can open what.",
+      "It works for offices, shops, warehouses, schools, and rental properties, and we can add doors as your business grows.",
+    ),
+  },
+  {
+    slug: "business-lockout",
+    title: "Business Lockout",
+    icon: "lock-open",
+    shortDescription: "Locked out of your office, shop, or warehouse? We'll get you open fast, day or night.",
+    longDescription: paragraphs(
+      "Locked out of your office, shop, or warehouse? Every minute closed costs you business, so we head straight to you, day or night.",
+      "We open doors without damaging your locks or storefront whenever possible, including commercial locks, padlocks, and storage rooms.",
+      "If the key is lost for good, we can rekey or change the lock on the spot so the old key no longer works.",
+    ),
+  },
+  {
+    slug: "business-rekey",
+    title: "Business Rekey",
+    icon: "rekey",
+    shortDescription: "Employee left or a key went missing? We rekey your locks so old keys stop working.",
+    longDescription: paragraphs(
+      "When an employee leaves, a tenant moves out, or a key goes missing, rekeying makes every old key stop working.",
+      "We change the pins inside your existing locks and give you new keys, which costs far less than replacing the locks.",
+      "We can rekey a single door or the whole building, and set it up to work with a master key system.",
     ),
   },
 ];
@@ -242,7 +275,7 @@ export const starterFaqs = [
 
 export const starterPrivacyPolicy = `## 1. Who We Are
 
-Key Express is a mobile locksmith service. We drive to our customers to help with car, home, and business locks and keys. You can reach us by phone at {phone} or by email at {email}.
+Keys Express is a mobile locksmith service. We drive to our customers to help with car, home, and business locks and keys. You can reach us by phone at {phone} or by email at {email}.
 
 ## 2. Information We Collect
 
@@ -310,25 +343,25 @@ If you have questions about this policy or your information, please contact us:
 export const starterSeo = [
   {
     path: "/",
-    title: "Key Express | 24/7 Mobile Locksmith in {city}",
+    title: "Keys Express | 24/7 Mobile Locksmith in {city}",
     description:
-      "Locked out or lost your keys? Key Express is a mobile locksmith serving {city} and nearby areas, 24/7. Car keys, key fobs, homes, and businesses. Call {phone}.",
+      "Locked out or lost your keys? Keys Express is a mobile locksmith serving {city} and nearby areas, 24/7. Car keys, key fobs, homes, and businesses. Call {phone}.",
   },
   {
     path: "/about",
-    title: "About Us | Key Express",
+    title: "About Us | Keys Express",
     description:
-      "Key Express is a fully mobile locksmith. We bring the tools to your driveway, home, or business, and we handle the jobs others turn down.",
+      "Keys Express is a fully mobile locksmith. We bring the tools to your driveway, home, or business, and we handle the jobs others turn down.",
   },
   {
     path: "/contact",
-    title: "Contact Us | Key Express",
+    title: "Contact Us | Keys Express",
     description:
-      "Call Key Express at {phone}, day or night, or send a service request online. Mobile locksmith serving {city} and nearby areas.",
+      "Call Keys Express at {phone}, day or night, or send a service request online. Mobile locksmith serving {city} and nearby areas.",
   },
   {
     path: "/privacy-policy",
-    title: "Privacy Policy | Key Express",
-    description: "How Key Express collects, uses, and protects your personal information.",
+    title: "Privacy Policy | Keys Express",
+    description: "How Keys Express collects, uses, and protects your personal information.",
   },
 ];

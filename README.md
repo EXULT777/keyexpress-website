@@ -1,6 +1,6 @@
-# Key Express website
+# Keys Express website
 
-The website and Admin panel for **Key Express**, a fully mobile locksmith for cars, homes and businesses. It's built to be easy for older visitors and for people who aren't comfortable with technology: large text, big buttons, the phone number always one tap away, and no popups, sliders or animations.
+The website and Admin panel for **Keys Express**, a fully mobile locksmith for cars, homes and businesses. It's built to be easy for older visitors and for people who aren't comfortable with technology: large text, big buttons, the phone number always one tap away, and no popups, sliders or animations.
 
 Built from the project brief in [`docs/spec.md`](docs/spec.md).
 

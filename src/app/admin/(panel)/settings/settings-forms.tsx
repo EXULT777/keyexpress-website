@@ -165,7 +165,7 @@ export function LogoForm({
             <form action={restore}>
               <button type="submit" disabled={restoring} className={buttonClasses("secondary", "disabled:opacity-70")}>
                 <RotateCcw aria-hidden="true" className="size-6 shrink-0" />
-                Use the original Key Express logo again
+                Use the original Keys Express logo again
               </button>
             </form>
           )}

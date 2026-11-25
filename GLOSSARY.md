@@ -1,15 +1,15 @@
-# Key Express
+# Keys Express
 
-Key Express is a fully mobile locksmith: Technicians drive to the Customer for car, home and business lock and key work. This glossary covers the public website and the Admin panel that runs it.
+Keys Express is a fully mobile locksmith: Technicians drive to the Customer for car, home and business lock and key work. This glossary covers the public website and the Admin panel that runs it.
 
 ## People
 
 **Customer**:
-A person or company asking Key Express for help, by phone or through the website.
+A person or company asking Keys Express for help, by phone or through the website.
 _Avoid_: Client, user, lead
 
 **Technician**:
-A Key Express locksmith who drives to the Customer and does the work.
+A Keys Express locksmith who drives to the Customer and does the work.
 _Avoid_: Tech, worker, locksmith (for the person)
 
 **Admin**:
@@ -19,7 +19,7 @@ _Avoid_: User, account, admin account
 ## Work
 
 **Service**:
-One kind of job Key Express offers, such as Smart Keys or Residential, shown as a card on the site.
+One kind of job Keys Express offers, such as Smart Keys or Residential, shown as a card on the site.
 _Avoid_: Product, category, offering
 
 **Service Request**:
@@ -31,11 +31,11 @@ A Service Request the Customer marked "This is an emergency".
 _Avoid_: Urgent, priority
 
 **Status**:
-Where a Service Request stands: New (nobody has acted on it yet), Contacted (Key Express has reached the Customer) or Done (the job is finished or closed).
+Where a Service Request stands: New (nobody has acted on it yet), Contacted (Keys Express has reached the Customer) or Done (the job is finished or closed).
 _Avoid_: State, stage
 
 **Business Account**:
-An ongoing arrangement where Key Express handles the locks and keys for a company's buildings, vehicles or rental properties. It is set up by phone; it has no login and is not stored on the website.
+An ongoing arrangement where Keys Express handles the locks and keys for a company's buildings, vehicles or rental properties. It is set up by phone; it has no login and is not stored on the website.
 _Avoid_: Account, commercial account, client account
 
 ## Place

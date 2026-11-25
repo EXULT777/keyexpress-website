@@ -15,7 +15,7 @@ const request: ServiceRequestRecord = {
   status: "NEW",
 };
 
-const settings = { businessName: "Key Express", email: "info@keyexpress.example", notificationEmail: "" };
+const settings = { businessName: "Keys Express", email: "info@keyexpress.example", notificationEmail: "" };
 
 describe("the email about a new Service Request", () => {
   test("goes to the business email when no separate address is set", () => {
